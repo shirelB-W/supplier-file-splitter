@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>מפצל קבצים לפי ספקים</title>
+
+<!-- ספריות לקריאה/כתיבה של אקסל ולהורדת קבצים -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+<style>
+  :root{
+    --bg1:#f6f3ff;        /* לבנדר עדין */
+    --bg2:#eefcf7;        /* מנטה עדין */
+    --card:#ffffff;
+    --lavender:#cdb4f6;
+    --lavender-d:#a883e8;
+    --mint:#a8e6cf;
+    --peach:#ffd9c0;
+    --pink:#ffc8dd;
+    --text:#4a4458;
+    --text-soft:#8b86a0;
+    --line:#ece8f5;
+    --ok:#7ed6a5;
+    --shadow:0 10px 30px rgba(150,130,200,.15);
+    --radius:22px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Heebo","Segoe UI",Tahoma,sans-serif;
+    background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 100%);
+    color:var(--text);
+    min-height:100vh;
+    padding:32px 16px 60px;
+  }
+  .wrap{max-width:820px;margin:0 auto;}
+
+  header{text-align:center;margin-bottom:28px;}
+  header .logo{
+    font-size:40px;line-height:1;margin-bottom:10px;
+  }
+  header h1{
+    margin:0;font-size:28px;font-weight:800;letter-spacing:-.5px;
+  }
+  header p{margin:8px 0 0;color:var(--text-soft);font-size:15px;}
+
+  .card{
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:28px;
+    margin-bottom:22px;
+    border:1px solid var(--line);
+  }
+
+  /* אזור העלאה */
+  .drop{
+    border:2.5px dashed var(--lavender);
+    border-radius:18px;
+    padding:44px 20px;
+    text-align:center;
+    background:linear-gradient(180deg,#fbf9ff,#f7fffb);
+    transition:.2s;
+    cursor:pointer;
+  }
+  .drop:hover,.drop.over{
+    border-color:var(--lavender-d);
+    background:#f3eeff;
+    transform:translateY(-2px);
+  }
+  .drop .ico{font-size:46px;margin-bottom:8px;}
+  .drop .big{font-size:18px;font-weight:700;}
+  .drop .small{color:var(--text-soft);font-size:13px;margin-top:6px;}
+  input[type=file]{display:none;}
+
+  .file-tag{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--mint);color:#1f6b4b;font-weight:700;
+    padding:8px 16px;border-radius:999px;margin-top:16px;font-size:14px;
+  }
+
+  /* בחירת עמודה */
+  .field{margin-top:18px;text-align:right;}
+  .field label{display:block;font-weight:700;margin-bottom:8px;font-size:14px;}
+  select{
+    width:100%;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line);
+    font-size:15px;font-family:inherit;background:#fff;color:var(--text);cursor:pointer;
+  }
+  select:focus{outline:none;border-color:var(--lavender-d);}
+
+  /* כפתורים */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    border:none;border-radius:14px;padding:13px 26px;font-size:15px;font-weight:800;
+    font-family:inherit;cursor:pointer;transition:.18s;color:#fff;
+  }
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .btn-main{background:linear-gradient(135deg,var(--lavender-d),var(--lavender));width:100%;font-size:16px;}
+  .btn-main:not(:disabled):hover{filter:brightness(1.05);transform:translateY(-2px);box-shadow:0 8px 20px rgba(168,131,232,.4);}
+  .btn-zip{background:linear-gradient(135deg,#7ec8e3,#a8e6cf);color:#0d5b5b;}
+  .btn-zip:hover{filter:brightness(1.04);transform:translateY(-1px);}
+  .btn-small{
+    background:var(--bg1);color:var(--lavender-d);padding:8px 16px;font-size:13px;
+    border:1.5px solid var(--lavender);
+  }
+  .btn-small:hover{background:var(--lavender);color:#fff;}
+
+  /* תוצאות */
+  .results-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:8px;}
+  .results-head h2{margin:0;font-size:20px;}
+  .summary{color:var(--text-soft);font-size:14px;margin:4px 0 18px;}
+  .supplier-list{display:flex;flex-direction:column;gap:10px;}
+  .supplier-row{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    background:#fbfaff;border:1px solid var(--line);border-radius:14px;padding:12px 16px;
+  }
+  .supplier-row .name{font-weight:700;display:flex;align-items:center;gap:10px;}
+  .supplier-row .dot{width:10px;height:10px;border-radius:50%;background:var(--lavender);}
+  .badge{background:var(--peach);color:#a85a2b;font-size:12px;font-weight:800;padding:3px 11px;border-radius:999px;}
+
+  /* תיבות סימון לעמודות סיכום */
+  .checks{display:flex;flex-wrap:wrap;gap:8px;}
+  .chk{
+    display:inline-flex;align-items:center;gap:7px;cursor:pointer;
+    background:#fbfaff;border:1.5px solid var(--line);border-radius:12px;
+    padding:8px 13px;font-size:13.5px;font-weight:600;transition:.15s;user-select:none;
+  }
+  .chk:hover{border-color:var(--lavender);}
+  .chk.on{background:var(--lavender);color:#fff;border-color:var(--lavender-d);}
+  .chk input{accent-color:var(--lavender-d);width:16px;height:16px;cursor:pointer;}
+
+  /* אנימציית טעינה */
+  .overlay{
+    position:fixed;inset:0;z-index:50;
+    background:rgba(246,243,255,.78);backdrop-filter:blur(4px);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+    opacity:0;pointer-events:none;transition:opacity .25s;
+  }
+  .overlay.show{opacity:1;pointer-events:auto;}
+  .spinner{position:relative;width:74px;height:74px;}
+  .spinner .ring{
+    position:absolute;inset:0;border-radius:50%;
+    border:6px solid transparent;border-top-color:var(--lavender-d);
+    animation:spin 1s linear infinite;
+  }
+  .spinner .ring.two{inset:12px;border-top-color:var(--mint);animation-duration:1.4s;animation-direction:reverse;}
+  .spinner .flower{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:26px;animation:pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.18);}}
+  .overlay .ltext{font-size:17px;font-weight:800;color:var(--text);}
+  .overlay .lsub{font-size:14px;color:var(--text-soft);margin-top:-8px;}
+  .dots::after{content:"";animation:dots 1.2s steps(4,end) infinite;}
+  @keyframes dots{0%{content:"";}25%{content:"·";}50%{content:"··";}75%{content:"···";}}
+
+  .hidden{display:none;}
+  .msg{padding:14px 18px;border-radius:14px;font-size:14px;font-weight:600;margin-top:16px;}
+  .msg.err{background:#ffe1e6;color:#b23a5a;}
+  .msg.info{background:#e6f3ff;color:#3a6fb2;}
+
+  footer{text-align:center;color:var(--text-soft);font-size:12px;margin-top:30px;}
+  .step-num{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:26px;height:26px;border-radius:50%;background:var(--lavender);color:#fff;
+    font-size:14px;font-weight:800;margin-left:8px;
+  }
+  .card-title{display:flex;align-items:center;font-size:17px;font-weight:800;margin:0 0 4px;}
+</style>
+</head>
+<body>
+
+<!-- אנימציית טעינה -->
+<div class="overlay" id="overlay">
+  <div class="spinner">
+    <div class="ring"></div>
+    <div class="ring two"></div>
+    <div class="flower">🌸</div>
+  </div>
+  <div class="ltext" id="loaderText">מעבד<span class="dots"></span></div>
+  <div class="lsub" id="loaderSub"></div>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <div class="logo">🌸</div>
+    <h1>מפצל קבצים לפי ספקים</h1>
+    <p>מעלים קובץ אחד — מקבלים קובץ אקסל נפרד לכל ספק</p>
+  </header>
+
+  <!-- שלב 1: העלאה -->
+  <div class="card">
+    <div class="card-title"><span class="step-num">1</span> העלאת הקובץ</div>
+    <div class="drop" id="drop">
+      <div class="ico">📂</div>
+      <div class="big">גררו לכאן קובץ אקסל או לחצו לבחירה</div>
+      <div class="small">פורמט נתמך: ‎.xlsx‎ , ‎.xls‎</div>
+      <div id="fileTagWrap"></div>
+    </div>
+    <input type="file" id="fileInput" accept=".xlsx,.xls" />
+
+    <!-- בחירת עמודת הספק -->
+    <div class="field hidden" id="colField">
+      <label for="colSelect">עמודת שם הספק</label>
+      <select id="colSelect"></select>
+    </div>
+
+    <!-- בחירת עמודת התאריך (לשם הקובץ) -->
+    <div class="field hidden" id="dateField">
+      <label for="dateSelect">עמודת התאריך (לחילוץ חודש ושנה לשם הקובץ)</label>
+      <select id="dateSelect"></select>
+      <div class="small" style="color:var(--text-soft);margin-top:6px;">שם כל קובץ יהיה: <b>חודש-שנה שם הספק</b> · לדוגמה: <span dir="ltr">05-2026</span> שיווק שלי</div>
+    </div>
+
+    <!-- עמודות לסיכום -->
+    <div class="field hidden" id="sumField">
+      <label>עמודות לסיכום — תתווסף שורת "סה״כ" בתחתית כל קובץ</label>
+      <div id="sumCols" class="checks"></div>
+      <div class="small" style="color:var(--text-soft);margin-top:8px;">סמנו אילו עמודות מספריות לסכום. אם לא תסמנו כלום — לא תתווסף שורת סיכום.</div>
+    </div>
+
+    <div id="uploadMsg"></div>
+  </div>
+
+  <!-- שלב 2: עיבוד -->
+  <div class="card">
+    <div class="card-title"><span class="step-num">2</span> פיצול הנתונים</div>
+    <button class="btn btn-main" id="processBtn" disabled>✨ פצל לפי ספקים</button>
+  </div>
+
+  <!-- שלב 3: תוצאות -->
+  <div class="card hidden" id="resultsCard">
+    <div class="results-head">
+      <h2>📁 התוצרים מוכנים</h2>
+      <button class="btn btn-zip" id="allBtn">⬇️ הורדת כל הקבצים</button>
+    </div>
+    <div class="summary" id="summary"></div>
+    <div class="supplier-list" id="supplierList"></div>
+  </div>
+
+  <footer>נבנה באהבה 🌿 — כל העיבוד מתבצע במחשב שלך, שום קובץ לא נשלח לאינטרנט</footer>
+</div>
+
+<script>
+/* ---------- מצב גלובלי ---------- */
+let workbookRows = [];   // כל השורות כאובייקטים
+let headers = [];        // שמות העמודות
+let supplierFiles = [];  // { name, blob, filename, count }
+let sourceFileName = "";
+
+const PREFERRED_COL = "שם הספק";
+const PREFERRED_DATE = "תאריך המסמך";
+const HE_MONTHS = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
+
+const $ = id => document.getElementById(id);
+const drop = $("drop");
+const fileInput = $("fileInput");
+
+/* ---------- העלאת קובץ (גרירה + לחיצה) ---------- */
+drop.addEventListener("click", () => fileInput.click());
+drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("over"); });
+drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+drop.addEventListener("drop", e => {
+  e.preventDefault(); drop.classList.remove("over");
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener("change", e => {
+  if (e.target.files.length) handleFile(e.target.files[0]);
+});
+
+function showMsg(where, text, type){
+  const box = $(where);
+  if(!text){ box.innerHTML = ""; return; }
+  box.innerHTML = `<div class="msg ${type}">${text}</div>`;
+}
+
+/* ---------- קריאת הקובץ ---------- */
+function handleFile(file){
+  const okExt = /\.(xlsx|xls)$/i.test(file.name);
+  if(!okExt){
+    showMsg("uploadMsg","⚠️ אפשר להעלות רק קבצי אקסל (‎.xlsx / .xls‎).","err");
+    return;
+  }
+  sourceFileName = file.name.replace(/\.(xlsx|xls)$/i,"");
+  showMsg("uploadMsg","");
+  $("resultsCard").classList.add("hidden");
+
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try{
+      const data = new Uint8Array(ev.target.result);
+      const wb = XLSX.read(data,{type:"array"});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      workbookRows = XLSX.utils.sheet_to_json(ws,{defval:""});
+
+      if(!workbookRows.length){
+        showMsg("uploadMsg","⚠️ הקובץ ריק או שאין בו נתונים בגיליון הראשון.","err");
+        resetState(); return;
+      }
+      headers = Object.keys(workbookRows[0]);
+      buildColumnSelect();
+      buildDateSelect();
+      buildSumChecks();
+
+      $("fileTagWrap").innerHTML =
+        `<div class="file-tag">✓ ${file.name} · ${workbookRows.length} שורות</div>`;
+      $("colField").classList.remove("hidden");
+      $("dateField").classList.remove("hidden");
+      $("sumField").classList.remove("hidden");
+      $("processBtn").disabled = false;
+      showMsg("uploadMsg",`נמצאו <b>${workbookRows.length}</b> שורות ו-<b>${headers.length}</b> עמודות. בדקו שעמודת הספק נכונה ולחצו "פצל".`,"info");
+    }catch(err){
+      console.error(err);
+      showMsg("uploadMsg","❌ לא הצלחתי לקרוא את הקובץ. ודאו שזה קובץ אקסל תקין.","err");
+      resetState();
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function buildColumnSelect(){
+  const sel = $("colSelect");
+  sel.innerHTML = "";
+  headers.forEach(h => {
+    const o = document.createElement("option");
+    o.value = h; o.textContent = h;
+    sel.appendChild(o);
+  });
+  // ניסיון לאתר אוטומטית את עמודת "שם הספק"
+  const match = headers.find(h => h.trim() === PREFERRED_COL)
+            || headers.find(h => h.includes("ספק"));
+  if(match) sel.value = match;
+}
+
+function buildDateSelect(){
+  const sel = $("dateSelect");
+  sel.innerHTML = "";
+  // אפשרות ללא תאריך (רק שם הספק)
+  const none = document.createElement("option");
+  none.value = ""; none.textContent = "— ללא תאריך (שם הספק בלבד) —";
+  sel.appendChild(none);
+  headers.forEach(h => {
+    const o = document.createElement("option");
+    o.value = h; o.textContent = h;
+    sel.appendChild(o);
+  });
+  const match = headers.find(h => h.trim() === PREFERRED_DATE)
+            || headers.find(h => h.includes("תאריך"));
+  if(match) sel.value = match;
+}
+
+/* חילוץ חודש-שנה מערך תאריך (טקסט DD/MM/YYYY, Date, או מספר סידורי של אקסל) */
+function monthYear(val){
+  if(val === undefined || val === null || val === "") return null;
+  let d = null;
+  if(val instanceof Date){ d = val; }
+  else if(typeof val === "number"){
+    // מספר סידורי של אקסל -> תאריך
+    d = new Date(Math.round((val - 25569) * 86400 * 1000));
+  } else {
+    const s = String(val).trim();
+    // פורמטים נפוצים: DD/MM/YYYY  או DD.MM.YYYY  או DD-MM-YYYY
+    let m = s.match(/^(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{2,4})/);
+    if(m){
+      let mm = parseInt(m[2],10), yy = parseInt(m[3],10);
+      if(yy < 100) yy += 2000;
+      return { mm, yy };
+    }
+    // פורמט YYYY-MM-DD
+    m = s.match(/^(\d{4})[\/\.\-](\d{1,2})[\/\.\-](\d{1,2})/);
+    if(m){ return { mm: parseInt(m[2],10), yy: parseInt(m[1],10) }; }
+    const parsed = new Date(s);
+    if(!isNaN(parsed)) d = parsed;
+  }
+  if(d && !isNaN(d)){ return { mm: d.getMonth()+1, yy: d.getFullYear() }; }
+  return null;
+}
+
+/* החודש-שנה השכיח ביותר בקבוצת שורות -> "MM-YYYY" */
+function dominantMonthYear(rows, dateCol){
+  if(!dateCol) return "";
+  const tally = {};
+  rows.forEach(r => {
+    const my = monthYear(r[dateCol]);
+    if(my){ const k = String(my.mm).padStart(2,"0")+"-"+my.yy; tally[k] = (tally[k]||0)+1; }
+  });
+  const keys = Object.keys(tally);
+  if(!keys.length) return "";
+  keys.sort((a,b)=> tally[b]-tally[a]);
+  return keys[0];
+}
+
+/* פענוח ערך למספר. מחזיר null אם אינו מספר (כולל "-" / ריק) */
+function parseNum(v){
+  if(v === undefined || v === null) return null;
+  if(typeof v === "number") return isFinite(v) ? v : null;
+  let s = String(v).trim();
+  if(s === "" || s === "-") return null;
+  s = s.replace(/[,\s₪]/g,"");           // הסרת פסיקים, רווחים, ש"ח
+  if(!/^-?\d*\.?\d+$/.test(s)) return null; // רק מספר תקין (כולל שלילי/עשרוני)
+  const n = parseFloat(s);
+  return isFinite(n) ? n : null;
+}
+
+/* זיהוי עמודות מספריות: לפחות 70% מהערכים הלא-ריקים הם מספרים */
+function detectNumericCols(){
+  return headers.filter(h => {
+    let num = 0, nonEmpty = 0;
+    for(const r of workbookRows){
+      const raw = r[h];
+      const s = (raw === undefined || raw === null) ? "" : String(raw).trim();
+      if(s === "" || s === "-") continue;
+      nonEmpty++;
+      if(parseNum(raw) !== null) num++;
+    }
+    return nonEmpty > 0 && (num / nonEmpty) >= 0.7;
+  });
+}
+
+/* בניית תיבות הסימון לעמודות סיכום */
+function buildSumChecks(){
+  const box = $("sumCols");
+  box.innerHTML = "";
+  const numeric = detectNumericCols();
+  if(!numeric.length){
+    box.innerHTML = `<span style="color:var(--text-soft);font-size:13px;">לא זוהו עמודות מספריות בקובץ.</span>`;
+    return;
+  }
+  // סימון מראש: עמודות מצטברות אמיתיות (שווי / סה"כ / כמות / סכום)
+  const additive = /שווי|סה.?כ|כמות|סכום/;
+  numeric.forEach(h => {
+    const pre = additive.test(h);
+    const id = "sum_" + btoa(unescape(encodeURIComponent(h))).replace(/=/g,"");
+    const lbl = document.createElement("label");
+    lbl.className = "chk" + (pre ? " on" : "");
+    lbl.innerHTML = `<input type="checkbox" value="${h.replace(/"/g,'&quot;')}" ${pre?"checked":""}><span>${h}</span>`;
+    const cb = lbl.querySelector("input");
+    cb.addEventListener("change", () => lbl.classList.toggle("on", cb.checked));
+    box.appendChild(lbl);
+  });
+}
+
+function getCheckedSumCols(){
+  return Array.from($("sumCols").querySelectorAll("input:checked")).map(c => c.value);
+}
+
+function resetState(){
+  workbookRows = []; headers = []; supplierFiles = [];
+  $("processBtn").disabled = true;
+  $("colField").classList.add("hidden");
+  $("dateField").classList.add("hidden");
+  $("sumField").classList.add("hidden");
+  $("fileTagWrap").innerHTML = "";
+}
+
+/* ---------- אנימציית טעינה ---------- */
+function showLoader(text, sub){
+  $("loaderText").innerHTML = (text || "מעבד") + '<span class="dots"></span>';
+  $("loaderSub").textContent = sub || "";
+  $("overlay").classList.add("show");
+}
+function setLoaderSub(sub){ $("loaderSub").textContent = sub || ""; }
+function hideLoader(){ $("overlay").classList.remove("show"); }
+const nextFrame = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+/* ---------- פיצול לפי ספקים ---------- */
+$("processBtn").addEventListener("click", async () => {
+  const col = $("colSelect").value;
+  const dateCol = $("dateSelect").value;
+  if(!col){ showMsg("uploadMsg","בחרו עמודת ספק.","err"); return; }
+
+  // קיבוץ
+  const groups = {};
+  let emptyCount = 0;
+  workbookRows.forEach(row => {
+    let key = (row[col] === undefined || row[col] === null) ? "" : String(row[col]).trim();
+    if(key === ""){ key = "ללא שם ספק"; emptyCount++; }
+    (groups[key] = groups[key] || []).push(row);
+  });
+
+  const names = Object.keys(groups).sort((a,b)=>a.localeCompare(b,"he"));
+  if(!names.length){
+    showMsg("uploadMsg","לא נמצאו ערכים בעמודה שנבחרה.","err"); return;
+  }
+
+  const sumCols = getCheckedSumCols();
+
+  // הצגת אנימציית הטעינה והמתנה לציור לפני העיבוד הכבד
+  showMsg("uploadMsg","");
+  showLoader("מפצל לפי ספקים", `0 מתוך ${names.length} קבצים`);
+  await nextFrame();
+
+  // יצירת קובץ אקסל לכל ספק
+  supplierFiles = [];
+  for(let idx=0; idx<names.length; idx++){
+    const name = names[idx];
+    let dataRows = groups[name];
+
+    // הוספת שורת סיכום בתחתית
+    if(sumCols.length){
+      const sumRow = {};
+      headers.forEach(h => sumRow[h] = "");
+      const labelCol = headers.find(h => !sumCols.includes(h)) || headers[0];
+      sumRow[labelCol] = 'סה״כ';
+      sumCols.forEach(h => {
+        let s = 0;
+        groups[name].forEach(r => { const n = parseNum(r[h]); if(n !== null) s += n; });
+        sumRow[h] = Math.round(s * 100) / 100;
+      });
+      dataRows = groups[name].concat([sumRow]);
+    }
+
+    const ws = XLSX.utils.json_to_sheet(dataRows,{header:headers});
+    const wbOut = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wbOut, ws, sheetName(name));
+    const out = XLSX.write(wbOut,{bookType:"xlsx",type:"array"});
+    const blob = new Blob([out],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+    const my = dominantMonthYear(groups[name], dateCol);
+    const base = my ? (my + " " + name) : name;
+    supplierFiles.push({ name, my, blob, filename: safeName(base)+".xlsx", count: groups[name].length });
+
+    // עדכון התקדמות ושמירה על אנימציה חיה כל כמה קבצים
+    if(idx % 5 === 0 || idx === names.length-1){
+      setLoaderSub(`${idx+1} מתוך ${names.length} קבצים`);
+      await nextFrame();
+    }
+  }
+
+  hideLoader();
+  renderResults(emptyCount, sumCols);
+});
+
+function sheetName(n){ return n.replace(/[\\\/\?\*\[\]:]/g,"_").slice(0,31) || "גיליון"; }
+function safeName(n){ return n.replace(/[\\\/:*?"<>|]/g,"_").trim() || "ללא_שם"; }
+
+/* ---------- הצגת תוצאות ---------- */
+function renderResults(emptyCount, sumCols){
+  const list = $("supplierList");
+  list.innerHTML = "";
+  supplierFiles.forEach((f,i) => {
+    const row = document.createElement("div");
+    row.className = "supplier-row";
+    row.innerHTML = `
+      <div class="name">
+        <span class="dot"></span>
+        <span>
+          ${f.name}
+          <div style="font-size:12px;color:var(--text-soft);font-weight:500;margin-top:2px;" dir="ltr">📄 ${f.filename}</div>
+        </span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="badge">${f.count} שורות</span>
+        <button class="btn btn-small" data-i="${i}">⬇️ הורדה</button>
+      </div>`;
+    list.appendChild(row);
+  });
+  list.querySelectorAll("button[data-i]").forEach(b=>{
+    b.addEventListener("click",()=>{
+      const f = supplierFiles[b.dataset.i];
+      saveAs(f.blob, f.filename);
+    });
+  });
+
+  let extra = emptyCount ? ` · <b>${emptyCount}</b> שורות ללא שם ספק רוכזו בנפרד` : "";
+  let sumNote = (sumCols && sumCols.length) ? `<br>➕ נוספה שורת <b>סה״כ</b> לכל קובץ עבור: ${sumCols.join(" · ")}` : "";
+  $("summary").innerHTML = `נוצרו <b>${supplierFiles.length}</b> קבצים מתוך <b>${workbookRows.length}</b> שורות${extra}.${sumNote}`;
+  $("resultsCard").classList.remove("hidden");
+  $("resultsCard").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* ---------- הורדת כל הקבצים בנפרד ---------- */
+$("allBtn").addEventListener("click", async () => {
+  if(!supplierFiles.length) return;
+  const btn = $("allBtn");
+  btn.disabled = true;
+  const original = btn.textContent;
+  for(let i=0;i<supplierFiles.length;i++){
+    saveAs(supplierFiles[i].blob, supplierFiles[i].filename);
+    btn.textContent = `מוריד ${i+1}/${supplierFiles.length}…`;
+    // השהיה קצרה כדי שהדפדפן יספיק להוריד כל קובץ
+    await new Promise(r => setTimeout(r, 350));
+  }
+  btn.textContent = original;
+  btn.disabled = false;
+});
+</script>
+</body>
+</html>
