@@ -581,6 +581,8 @@ $("processBtn").addEventListener("click", async () => {
     }
 
     const ws = XLSX.utils.json_to_sheet(dataRows,{header:headers});
+    // רוחב עמודות: לפי אורך הכותרת (מוגבל), כדי שהכותרת תוצג בנוחות
+    ws["!cols"] = headers.map(h => ({ wch: Math.min(28, Math.max(12, String(h).length + 2)) }));
     styleHeaderRow(ws, headers.length);
     if(sumCols.length){ styleTotalRow(ws, dataRows.length, headers.length); }
     const wbOut = XLSX.utils.book_new();
@@ -653,9 +655,9 @@ function styleHeaderRow(ws, ncols){
     const addr = XLSX.utils.encode_cell({ r:0, c });
     if(ws[addr]){ ws[addr].s = HEADER_STYLE; }
   }
-  // הגבהת שורת הכותרת מעט
+  // הגבהת שורת הכותרת כדי שכותרות שנשברות לשתי שורות יוצגו במלואן
   ws["!rows"] = ws["!rows"] || [];
-  ws["!rows"][0] = { hpt: 22 };
+  ws["!rows"][0] = { hpt: 38 };
 }
 function styleTotalRow(ws, rowIdx, ncols){
   for(let c=0;c<ncols;c++){
