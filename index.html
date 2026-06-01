@@ -7,7 +7,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%B8%3C/text%3E%3C/svg%3E" />
 
 <!-- ספריות לקריאה/כתיבה של אקסל ולהורדת קבצים -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 
 <style>
@@ -224,6 +224,28 @@
       <div class="small" style="color:var(--text-soft);margin-top:8px;">סמני אילו עמודות מספריות לסכום. אם לא תסמני כלום — לא תתווסף שורת סיכום.</div>
     </div>
 
+    <!-- גיליון סיכום לפי סניף -->
+    <div class="field hidden" id="branchField">
+      <label class="chk on" id="branchEnableLabel" style="margin-bottom:12px;">
+        <input type="checkbox" id="branchEnable" checked>
+        <span>הוספת גיליון "סיכום לפי סניף" לכל קובץ</span>
+      </label>
+      <div id="branchOpts" style="display:grid;grid-template-columns:1fr;gap:12px;">
+        <div>
+          <label for="branchCol" style="font-size:13px;">עמודת סניף</label>
+          <select id="branchCol"></select>
+        </div>
+        <div>
+          <label for="beforeCol" style="font-size:13px;">סכום לזיכוי לפני מע״מ</label>
+          <select id="beforeCol"></select>
+        </div>
+        <div>
+          <label for="inclCol" style="font-size:13px;">סכום לזיכוי כולל מע״מ</label>
+          <select id="inclCol"></select>
+        </div>
+      </div>
+    </div>
+
     <div id="uploadMsg"></div>
   </div>
 
@@ -306,12 +328,14 @@ function handleFile(file){
       buildColumnSelect();
       buildDateSelect();
       buildSumChecks();
+      buildBranchSelects();
 
       $("fileTagWrap").innerHTML =
         `<div class="file-tag">✓ ${file.name} · ${workbookRows.length} שורות</div>`;
       $("colField").classList.remove("hidden");
       $("dateField").classList.remove("hidden");
       $("sumField").classList.remove("hidden");
+      $("branchField").classList.remove("hidden");
       $("processBtn").disabled = false;
       showMsg("uploadMsg",`נמצאו <b>${workbookRows.length}</b> שורות ו-<b>${headers.length}</b> עמודות. בדקי שעמודת הספק נכונה ולחצי "פצל".`,"info");
     }catch(err){
@@ -449,12 +473,45 @@ function getCheckedSumCols(){
   return Array.from($("sumCols").querySelectorAll("input:checked")).map(c => c.value);
 }
 
+/* בניית הבחירות לגיליון "סיכום לפי סניף" עם זיהוי אוטומטי */
+function fillSelect(sel, list, withNone){
+  sel.innerHTML = "";
+  if(withNone){
+    const o = document.createElement("option"); o.value=""; o.textContent="— ללא —"; sel.appendChild(o);
+  }
+  list.forEach(h => { const o=document.createElement("option"); o.value=h; o.textContent=h; sel.appendChild(o); });
+}
+function buildBranchSelects(){
+  fillSelect($("branchCol"), headers, false);
+  fillSelect($("beforeCol"), headers, false);
+  fillSelect($("inclCol"), headers, false);
+
+  // זיהוי אוטומטי
+  const branch = headers.find(h => h.includes("סניף"));
+  const before = headers.find(h => /זיכוי/.test(h) && /לא כולל/.test(h) && /סה/.test(h))
+              || headers.find(h => /זיכוי/.test(h) && /לא כולל/.test(h));
+  const incl   = headers.find(h => /זיכוי/.test(h) && /כולל/.test(h) && !/לא כולל/.test(h) && /סה/.test(h))
+              || headers.find(h => /זיכוי/.test(h) && /כולל/.test(h) && !/לא כולל/.test(h));
+  if(branch) $("branchCol").value = branch;
+  if(before) $("beforeCol").value = before;
+  if(incl)   $("inclCol").value   = incl;
+}
+
+// הפעלה/כיבוי של אזור הסיכום לפי סניף
+$("branchEnable").addEventListener("change", () => {
+  const on = $("branchEnable").checked;
+  $("branchEnableLabel").classList.toggle("on", on);
+  $("branchOpts").style.opacity = on ? "1" : ".4";
+  $("branchOpts").style.pointerEvents = on ? "auto" : "none";
+});
+
 function resetState(){
   workbookRows = []; headers = []; supplierFiles = [];
   $("processBtn").disabled = true;
   $("colField").classList.add("hidden");
   $("dateField").classList.add("hidden");
   $("sumField").classList.add("hidden");
+  $("branchField").classList.add("hidden");
   $("fileTagWrap").innerHTML = "";
 }
 
@@ -490,6 +547,14 @@ $("processBtn").addEventListener("click", async () => {
 
   const sumCols = getCheckedSumCols();
 
+  // הגדרות גיליון "סיכום לפי סניף"
+  const branchOn  = $("branchEnable").checked;
+  const branchCol = $("branchCol").value;
+  const beforeCol = $("beforeCol").value;
+  const inclCol   = $("inclCol").value;
+  const BEFORE_LBL = 'סכום לזיכוי לפני מע״מ';
+  const INCL_LBL   = 'סכום לזיכוי כולל מע״מ';
+
   // הצגת אנימציית הטעינה והמתנה לציור לפני העיבוד הכבד
   showMsg("uploadMsg","");
   showLoader("מפצל לפי ספקים", `0 מתוך ${names.length} קבצים`);
@@ -516,9 +581,43 @@ $("processBtn").addEventListener("click", async () => {
     }
 
     const ws = XLSX.utils.json_to_sheet(dataRows,{header:headers});
+    styleHeaderRow(ws, headers.length);
+    if(sumCols.length){ styleTotalRow(ws, dataRows.length, headers.length); }
     const wbOut = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wbOut, ws, sheetName(name));
-    const out = XLSX.write(wbOut,{bookType:"xlsx",type:"array"});
+
+    // גיליון נוסף: סיכום לפי סניף (סניף | סכום לפני מע"מ | סכום כולל מע"מ)
+    if(branchOn && branchCol){
+      const bg = {};
+      groups[name].forEach(r => {
+        const b = String(r[branchCol] ?? "").trim() || "(ללא סניף)";
+        if(!bg[b]) bg[b] = { before:0, incl:0 };
+        const nb = parseNum(r[beforeCol]); if(nb !== null) bg[b].before += nb;
+        const ni = parseNum(r[inclCol]);   if(ni !== null) bg[b].incl   += ni;
+      });
+      const bnames = Object.keys(bg).sort((a,b)=>a.localeCompare(b,"he"));
+      const summaryRows = bnames.map(b => {
+        const o = {};
+        o["סניף"] = b;
+        o[BEFORE_LBL] = Math.round(bg[b].before * 100) / 100;
+        o[INCL_LBL]   = Math.round(bg[b].incl   * 100) / 100;
+        return o;
+      });
+      // שורת סה"כ כללית
+      let tb=0, ti=0; bnames.forEach(b => { tb += bg[b].before; ti += bg[b].incl; });
+      const tot = {}; tot["סניף"] = 'סה״כ';
+      tot[BEFORE_LBL] = Math.round(tb*100)/100;
+      tot[INCL_LBL]   = Math.round(ti*100)/100;
+      summaryRows.push(tot);
+
+      const ws2 = XLSX.utils.json_to_sheet(summaryRows, { header:["סניף", BEFORE_LBL, INCL_LBL] });
+      ws2["!cols"] = [{ wch:34 }, { wch:22 }, { wch:22 }];
+      styleHeaderRow(ws2, 3);
+      styleTotalRow(ws2, summaryRows.length, 3);  // השורה האחרונה = סה"כ
+      XLSX.utils.book_append_sheet(wbOut, ws2, "סיכום לפי סניף");
+    }
+
+    const out = XLSX.write(wbOut,{bookType:"xlsx",type:"array",cellStyles:true});
     const blob = new Blob([out],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
     const my = dominantMonthYear(groups[name], dateCol);
     const base = my ? (my + " " + name) : name;
@@ -537,6 +636,33 @@ $("processBtn").addEventListener("click", async () => {
 
 function sheetName(n){ return n.replace(/[\\\/\?\*\[\]:]/g,"_").slice(0,31) || "גיליון"; }
 function safeName(n){ return n.replace(/[\\\/:*?"<>|]/g,"_").trim() || "ללא_שם"; }
+
+/* עיצוב שורת הכותרות בגיליון: רקע לבנדר פסטל, טקסט מודגש וממורכז */
+const HEADER_STYLE = {
+  fill:      { patternType:"solid", fgColor:{ rgb:"E3D7FB" } },
+  font:      { bold:true, sz:11, color:{ rgb:"4A4458" } },
+  alignment: { horizontal:"center", vertical:"center", wrapText:true },
+  border:    { bottom:{ style:"medium", color:{ rgb:"A883E8" } } }
+};
+const TOTAL_STYLE = {
+  fill: { patternType:"solid", fgColor:{ rgb:"EEFCF7" } },
+  font: { bold:true, color:{ rgb:"1F6B4B" } }
+};
+function styleHeaderRow(ws, ncols){
+  for(let c=0;c<ncols;c++){
+    const addr = XLSX.utils.encode_cell({ r:0, c });
+    if(ws[addr]){ ws[addr].s = HEADER_STYLE; }
+  }
+  // הגבהת שורת הכותרת מעט
+  ws["!rows"] = ws["!rows"] || [];
+  ws["!rows"][0] = { hpt: 22 };
+}
+function styleTotalRow(ws, rowIdx, ncols){
+  for(let c=0;c<ncols;c++){
+    const addr = XLSX.utils.encode_cell({ r:rowIdx, c });
+    if(ws[addr]){ ws[addr].s = TOTAL_STYLE; }
+  }
+}
 
 /* ---------- הצגת תוצאות ---------- */
 function renderResults(emptyCount, sumCols){
