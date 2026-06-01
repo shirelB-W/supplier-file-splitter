@@ -190,7 +190,7 @@
   <header>
     <div class="logo">🌸</div>
     <h1>עדי עוז</h1>
-    <p>מעלים קובץ אחד — מקבלים קובץ אקסל נפרד לכל ספק</p>
+    <p>מעלה קובץ אחד — מקבלת קובץ אקסל נפרד לכל ספק</p>
   </header>
 
   <!-- שלב 1: העלאה -->
@@ -198,7 +198,7 @@
     <div class="card-title"><span class="step-num">1</span> העלאת הקובץ</div>
     <div class="drop" id="drop">
       <div class="ico">📂</div>
-      <div class="big">גררו לכאן קובץ אקסל או לחצו לבחירה</div>
+      <div class="big">גררי לכאן קובץ אקסל או לחצי לבחירה</div>
       <div class="small">פורמט נתמך: ‎.xlsx‎ , ‎.xls‎</div>
       <div id="fileTagWrap"></div>
     </div>
@@ -221,7 +221,7 @@
     <div class="field hidden" id="sumField">
       <label>עמודות לסיכום — תתווסף שורת "סה״כ" בתחתית כל קובץ</label>
       <div id="sumCols" class="checks"></div>
-      <div class="small" style="color:var(--text-soft);margin-top:8px;">סמנו אילו עמודות מספריות לסכום. אם לא תסמנו כלום — לא תתווסף שורת סיכום.</div>
+      <div class="small" style="color:var(--text-soft);margin-top:8px;">סמני אילו עמודות מספריות לסכום. אם לא תסמני כלום — לא תתווסף שורת סיכום.</div>
     </div>
 
     <div id="uploadMsg"></div>
@@ -313,10 +313,10 @@ function handleFile(file){
       $("dateField").classList.remove("hidden");
       $("sumField").classList.remove("hidden");
       $("processBtn").disabled = false;
-      showMsg("uploadMsg",`נמצאו <b>${workbookRows.length}</b> שורות ו-<b>${headers.length}</b> עמודות. בדקו שעמודת הספק נכונה ולחצו "פצל".`,"info");
+      showMsg("uploadMsg",`נמצאו <b>${workbookRows.length}</b> שורות ו-<b>${headers.length}</b> עמודות. בדקי שעמודת הספק נכונה ולחצי "פצל".`,"info");
     }catch(err){
       console.error(err);
-      showMsg("uploadMsg","❌ לא הצלחתי לקרוא את הקובץ. ודאו שזה קובץ אקסל תקין.","err");
+      showMsg("uploadMsg","❌ לא הצלחתי לקרוא את הקובץ. ודאי שזה קובץ אקסל תקין.","err");
       resetState();
     }
   };
@@ -472,7 +472,7 @@ const nextFrame = () => new Promise(r => requestAnimationFrame(() => requestAnim
 $("processBtn").addEventListener("click", async () => {
   const col = $("colSelect").value;
   const dateCol = $("dateSelect").value;
-  if(!col){ showMsg("uploadMsg","בחרו עמודת ספק.","err"); return; }
+  if(!col){ showMsg("uploadMsg","בחרי עמודת ספק.","err"); return; }
 
   // קיבוץ
   const groups = {};
