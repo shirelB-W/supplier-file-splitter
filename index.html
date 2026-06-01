@@ -640,11 +640,17 @@ function sheetName(n){ return n.replace(/[\\\/\?\*\[\]:]/g,"_").slice(0,31) || "
 function safeName(n){ return n.replace(/[\\\/:*?"<>|]/g,"_").trim() || "ללא_שם"; }
 
 /* עיצוב שורת הכותרות בגיליון: רקע לבנדר פסטל, טקסט מודגש וממורכז */
+const HEADER_BORDER = { style:"thin", color:{ rgb:"A883E8" } };
 const HEADER_STYLE = {
   fill:      { patternType:"solid", fgColor:{ rgb:"E3D7FB" } },
   font:      { bold:true, sz:11, color:{ rgb:"4A4458" } },
   alignment: { horizontal:"center", vertical:"center", wrapText:true },
-  border:    { bottom:{ style:"medium", color:{ rgb:"A883E8" } } }
+  border:    {
+    top:    HEADER_BORDER,
+    left:   HEADER_BORDER,
+    right:  HEADER_BORDER,
+    bottom: { style:"medium", color:{ rgb:"A883E8" } }
+  }
 };
 const TOTAL_STYLE = {
   fill: { patternType:"solid", fgColor:{ rgb:"EEFCF7" } },
