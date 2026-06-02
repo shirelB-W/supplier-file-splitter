@@ -36,31 +36,47 @@
     min-height:100vh;
     padding:32px 16px 60px;
   }
-  .wrap{max-width:1160px;margin:0 auto;}
+  .wrap{max-width:860px;margin:0 auto;}
+  .layout{display:block;}
+  .main{width:100%;}
 
-  /* פריסה דו-טורית: פלואו + מדריך צדדי */
-  .layout{display:flex;gap:22px;align-items:flex-start;}
-  .main{flex:1;min-width:0;}
-  .guide{width:310px;flex-shrink:0;position:sticky;top:18px;}
-  @media(max-width:900px){
-    .layout{flex-direction:column;}
-    .guide{width:100%;position:static;}
+  /* מספר שלב קטן (ליד שדות) */
+  .lbl-step{display:inline-flex;align-items:center;gap:8px;}
+  .num-mini{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:22px;height:22px;border-radius:50%;background:var(--lavender);color:#fff;
+    font-size:12px;font-weight:800;flex-shrink:0;
   }
 
-  /* כרטיס מדריך */
-  .guide-card{
-    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-    box-shadow:var(--shadow);padding:22px;
+  /* טול-טיפ פסטל */
+  .info{
+    position:relative;display:inline-flex;align-items:center;justify-content:center;
+    width:18px;height:18px;border-radius:50%;
+    background:linear-gradient(135deg,var(--lavender),var(--mint));
+    color:#fff;font-size:12px;font-weight:800;cursor:help;
+    margin-inline-start:7px;flex-shrink:0;font-family:Georgia,serif;font-style:italic;
   }
-  .guide-title{font-weight:800;font-size:16px;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
-  .steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:15px;}
-  .steps li{border-right:3px solid var(--lavender);padding-right:12px;}
-  .steps li b{display:block;font-size:13.5px;color:var(--text);margin-bottom:3px;}
-  .steps li span{display:block;font-size:12.5px;color:var(--text-soft);line-height:1.55;}
-  .steps li em{
-    display:inline-block;font-style:normal;font-size:11.5px;color:var(--lavender-d);
-    background:var(--bg1);padding:3px 9px;border-radius:8px;margin-top:5px;
+  .info:focus{outline:none;box-shadow:0 0 0 3px rgba(168,131,232,.35);}
+  .info .tip{
+    position:absolute;bottom:150%;right:-6px;
+    background:linear-gradient(180deg,#fbf9ff,#f1fcf8);
+    color:var(--text);border:1.5px solid var(--lavender);
+    border-radius:14px;padding:11px 14px;width:248px;
+    font-size:12.5px;font-weight:500;line-height:1.6;text-align:right;
+    box-shadow:0 12px 30px rgba(150,130,200,.28);
+    opacity:0;visibility:hidden;transform:translateY(6px);transition:.18s;
+    z-index:40;pointer-events:none;white-space:normal;
   }
+  .info .tip::after{
+    content:"";position:absolute;top:100%;right:10px;
+    border:7px solid transparent;border-top-color:var(--lavender);
+  }
+  .info:hover .tip, .info:focus .tip{opacity:1;visibility:visible;transform:translateY(0);}
+  .info .tip .imp{
+    display:block;margin-top:7px;padding-top:7px;border-top:1px dashed var(--line);
+    color:var(--lavender-d);font-size:11.5px;
+  }
+  .card-title .info{vertical-align:middle;}
 
   /* רשימת תוצאות נגללת + חיפוש */
   .scroll-list{overflow-y:auto;padding-left:6px;}
@@ -263,7 +279,9 @@
 
   <!-- שלב 1: העלאה -->
   <div class="card">
-    <div class="card-title"><span class="step-num">1</span> העלאת הקובץ</div>
+    <div class="card-title"><span class="step-num">1</span> העלאת הקובץ
+      <span class="info" tabindex="0">i<span class="tip">גררי קובץ אקסל (‎.xlsx / .xls‎). המערכת קוראת את הגיליון הראשון ומזהה אוטומטית את העמודות.<span class="imp">רק הגיליון הראשון נקרא; השורה הראשונה משמשת ככותרות.</span></span></span>
+    </div>
     <div class="drop" id="drop">
       <div class="ico">📂</div>
       <div class="big">גררי לכאן קובץ אקסל או לחצי לבחירה</div>
@@ -274,30 +292,40 @@
 
     <!-- בחירת עמודת הספק -->
     <div class="field hidden" id="colField">
-      <label for="colSelect">עמודת שם הספק</label>
+      <label for="colSelect" class="lbl-step"><span class="num-mini">2</span> עמודת שם הספק
+        <span class="info" tabindex="0">i<span class="tip">לפי עמודה זו מתבצע הפיצול — כל ערך ייחודי הופך לקובץ נפרד.<span class="imp">שורות ללא ערך מרוכזות בקובץ "ללא שם ספק".</span></span></span>
+      </label>
       <select id="colSelect"></select>
     </div>
 
     <!-- בחירת עמודת התאריך (לשם הקובץ) -->
     <div class="field hidden" id="dateField">
-      <label for="dateSelect">עמודת התאריך (לחילוץ חודש ושנה לשם הקובץ)</label>
+      <label for="dateSelect" class="lbl-step"><span class="num-mini">3</span> עמודת התאריך (לחילוץ חודש ושנה לשם הקובץ)
+        <span class="info" tabindex="0">i<span class="tip">קובעת את החודש והשנה בשם הקובץ (חודש-שנה שם הספק).<span class="imp">אם לספק יש כמה חודשים — נבחר החודש השכיח.</span></span></span>
+      </label>
       <select id="dateSelect"></select>
       <div class="small" style="color:var(--text-soft);margin-top:6px;">שם כל קובץ יהיה: <b>חודש-שנה שם הספק</b> · לדוגמה: <span dir="ltr">05-2026</span> שיווק שלי</div>
     </div>
 
     <!-- עמודות לסיכום -->
     <div class="field hidden" id="sumField">
-      <label>עמודות לסיכום — תתווסף שורת "סה״כ" בתחתית כל קובץ</label>
+      <label class="lbl-step"><span class="num-mini">4</span> עמודות לסיכום — תתווסף שורת "סה״כ" בתחתית כל קובץ
+        <span class="info" tabindex="0">i<span class="tip">סמני עמודות מספריות שיתווסף להן סיכום ("סה״כ") בתחתית כל קובץ.<span class="imp">לא חובה — אפשר להשאיר ללא סימון.</span></span></span>
+      </label>
       <div id="sumCols" class="checks"></div>
       <div class="small" style="color:var(--text-soft);margin-top:8px;">סמני אילו עמודות מספריות לסכום. אם לא תסמני כלום — לא תתווסף שורת סיכום.</div>
     </div>
 
     <!-- גיליון סיכום לפי סניף -->
     <div class="field hidden" id="branchField">
-      <label class="chk on" id="branchEnableLabel" style="margin-bottom:12px;">
-        <input type="checkbox" id="branchEnable" checked>
-        <span>הוספת גיליון "סיכום לפי סניף" לכל קובץ</span>
-      </label>
+      <div class="lbl-step" style="margin-bottom:12px;">
+        <span class="num-mini">5</span>
+        <label class="chk on" id="branchEnableLabel">
+          <input type="checkbox" id="branchEnable" checked>
+          <span>הוספת גיליון "סיכום לפי סניף" לכל קובץ</span>
+        </label>
+        <span class="info" tabindex="0">i<span class="tip">מוסיף גיליון שני בכל קובץ עם סכום זיכוי (לפני/כולל מע״מ) לכל סניף.<span class="imp">אפשר לכבות אם לא נחוץ.</span></span></span>
+      </div>
       <div id="branchOpts" style="display:grid;grid-template-columns:1fr;gap:12px;">
         <div>
           <label for="branchCol" style="font-size:13px;">עמודת סניף</label>
@@ -319,14 +347,18 @@
 
   <!-- שלב 2: עיבוד -->
   <div class="card">
-    <div class="card-title"><span class="step-num">2</span> פיצול הנתונים</div>
+    <div class="card-title"><span class="step-num">6</span> פיצול הנתונים
+      <span class="info" tabindex="0">i<span class="tip">יוצר קובץ אקסל מעוצב נפרד לכל ספק, עם כל העמודות והכותרות.<span class="imp">הכל מתבצע בדפדפן — שום קובץ לא נשלח לרשת.</span></span></span>
+    </div>
     <button class="btn btn-main" id="processBtn" disabled>✨ פצל לפי ספקים</button>
   </div>
 
   <!-- שלב 3: תוצאות -->
   <div class="card hidden" id="resultsCard">
     <div class="results-head">
-      <h2>📁 התוצרים מוכנים</h2>
+      <h2><span class="num-mini">7</span> התוצרים מוכנים
+        <span class="info" tabindex="0">i<span class="tip">הורדת כל קובץ בנפרד או הכל יחד; אפשר לחפש קובץ ברשימה.<span class="imp">בהורדת הכל הדפדפן עשוי לבקש אישור להורדות מרובות.</span></span></span>
+      </h2>
       <button class="btn btn-zip" id="allBtn">⬇️ הורדת כל הקבצים</button>
     </div>
     <div class="summary" id="summary"></div>
@@ -342,7 +374,9 @@
 
     <!-- שלב 1: העלאת שני קבצים -->
     <div class="card">
-      <div class="card-title"><span class="step-num">1</span> העלאת שני הקבצים</div>
+      <div class="card-title"><span class="step-num">1</span> העלאת שני הקבצים
+        <span class="info" tabindex="0">i<span class="tip">העלי קובץ מקור (שיש בו מק״ט) וקובץ יעד (שאליו מוסיפים את המק״ט).<span class="imp">שני הקבצים נדרשים כדי להמשיך.</span></span></span>
+      </div>
       <div class="two-drops">
         <div>
           <div class="mlabel">📤 קובץ מקור <span>(שממנו לוקחים את המק״ט)</span></div>
@@ -368,35 +402,49 @@
 
     <!-- שלב 2: הגדרות מיזוג -->
     <div class="card hidden" id="mergeOptsCard">
-      <div class="card-title"><span class="step-num">2</span> הגדרות המיזוג</div>
+      <div class="card-title">⚙️ הגדרות המיזוג
+        <span class="info" tabindex="0">i<span class="tip">בוחרים לפי מה לקשר בין הקבצים ומה להעתיק. המערכת מזהה אוטומטית.<span class="imp">ההתאמה לפי טקסט, אחרי ניקוי רווחים מיותרים.</span></span></span>
+      </div>
       <div class="field">
-        <label for="matchColTgt">עמודת שם המוצר בקובץ היעד 📥</label>
+        <label for="matchColTgt" class="lbl-step"><span class="num-mini">2</span> עמודת שם המוצר בקובץ היעד 📥
+          <span class="info" tabindex="0">i<span class="tip">העמודה בקובץ היעד שלפיה מזהים כל מוצר (למשל "פריט").<span class="imp">יכולה להיקרא אחרת מאשר בקובץ המקור.</span></span></span>
+        </label>
         <select id="matchColTgt"></select>
       </div>
       <div class="field">
-        <label for="matchColSrc">עמודת שם המוצר בקובץ המקור 📤</label>
+        <label for="matchColSrc" class="lbl-step"><span class="num-mini">3</span> עמודת שם המוצר בקובץ המקור 📤
+          <span class="info" tabindex="0">i<span class="tip">העמודה בקובץ המקור עם אותו שם מוצר (למשל "מוצר").<span class="imp">הערכים צריכים להיות זהים כדי להתאים.</span></span></span>
+        </label>
         <select id="matchColSrc"></select>
       </div>
       <div class="field">
-        <label for="copyCol">העמודה להעתקה מקובץ המקור (המק״ט)</label>
+        <label for="copyCol" class="lbl-step"><span class="num-mini">4</span> העמודה להעתקה מקובץ המקור (המק״ט)
+          <span class="info" tabindex="0">i<span class="tip">הערך שיועתק מקובץ המקור אל קובץ היעד (בדרך כלל המק״ט).</span></span>
+        </label>
         <select id="copyCol"></select>
       </div>
       <div class="field">
-        <label for="newColName">שם העמודה שתתווסף לקובץ היעד</label>
+        <label for="newColName" class="lbl-step"><span class="num-mini">5</span> שם העמודה שתתווסף לקובץ היעד
+          <span class="info" tabindex="0">i<span class="tip">איך תיקרא העמודה החדשה בקובץ היעד.<span class="imp">תמוקם מיד אחרי עמודת שם המוצר.</span></span></span>
+        </label>
         <input type="text" id="newColName" class="text-input" value="מק&quot;ט" />
       </div>
     </div>
 
     <!-- שלב 3: מיזוג -->
     <div class="card hidden" id="mergeRunCard">
-      <div class="card-title"><span class="step-num">3</span> מיזוג</div>
+      <div class="card-title"><span class="step-num">6</span> מיזוג
+        <span class="info" tabindex="0">i<span class="tip">מוסיף את המק״ט לכל פריט בקובץ היעד לפי ההתאמה.<span class="imp">כל שורות היעד נשמרות, גם ללא התאמה.</span></span></span>
+      </div>
       <button class="btn btn-main" id="mergeBtn">✨ מזגי והוסיפי מק״ט</button>
     </div>
 
     <!-- שלב 4: תוצאה -->
     <div class="card hidden" id="mergeResultsCard">
       <div class="results-head">
-        <h2>📁 הקובץ מוכן</h2>
+        <h2><span class="num-mini">7</span> הקובץ מוכן
+          <span class="info" tabindex="0">i<span class="tip">הורדת קובץ אחד עם עמודת המק״ט שהתווספה.<span class="imp">שורות ללא התאמה נצבעות באדום ומרוכזות בגיליון "ללא התאמה".</span></span></span>
+        </h2>
         <button class="btn btn-zip" id="mergeDownloadBtn">⬇️ הורדת הקובץ</button>
       </div>
       <div class="summary" id="mergeSummary"></div>
@@ -405,84 +453,6 @@
   </div><!-- /toolMerge -->
 
   </div><!-- /main -->
-
-  <!-- ============ מדריך צדדי ============ -->
-  <aside class="guide">
-    <!-- מדריך לפיצול לפי ספקים -->
-    <div class="guide-card" id="guideSplit">
-      <div class="guide-title">📖 מדריך — פיצול לפי ספקים</div>
-      <ol class="steps">
-        <li>
-          <b>1. העלאת הקובץ</b>
-          <span>גררי קובץ אקסל (‎.xlsx‎). המערכת קוראת את הגיליון הראשון ומזהה את העמודות.</span>
-          <em>השלכה: רק הגיליון הראשון נקרא; השורה הראשונה = כותרות.</em>
-        </li>
-        <li>
-          <b>2. עמודת שם הספק</b>
-          <span>לפיה מתבצע הפיצול — כל ערך ייחודי הופך לקובץ נפרד.</span>
-          <em>השלכה: שורות בלי ערך מרוכזות בקובץ "ללא שם ספק".</em>
-        </li>
-        <li>
-          <b>3. עמודת תאריך</b>
-          <span>קובעת את החודש-שנה בשם הקובץ (חודש-שנה שם הספק).</span>
-          <em>השלכה: אם לספק כמה חודשים — נבחר החודש השכיח.</em>
-        </li>
-        <li>
-          <b>4. עמודות לסיכום</b>
-          <span>סימון עמודות מספריות שיתווסף להן "סה״כ" בתחתית כל קובץ.</span>
-          <em>השלכה: לא חובה — אפשר להשאיר ריק.</em>
-        </li>
-        <li>
-          <b>5. גיליון "סיכום לפי סניף"</b>
-          <span>גיליון שני בכל קובץ עם סכום זיכוי (לפני/כולל מע״מ) לכל סניף.</span>
-          <em>השלכה: אפשר לכבות אם לא נחוץ.</em>
-        </li>
-        <li>
-          <b>6. פיצול לפי ספקים</b>
-          <span>יוצר קובץ אקסל מעוצב לכל ספק.</span>
-          <em>השלכה: הקבצים נוצרים בדפדפן — שום דבר לא נשלח לרשת.</em>
-        </li>
-        <li>
-          <b>7. הורדה</b>
-          <span>הורדת כל קובץ בנפרד, או הכל יחד. אפשר לחפש קובץ ברשימה.</span>
-          <em>השלכה: בהורדת הכל הדפדפן עשוי לבקש אישור להורדות מרובות.</em>
-        </li>
-      </ol>
-    </div>
-
-    <!-- מדריך למיזוג מק״ט -->
-    <div class="guide-card hidden" id="guideMerge">
-      <div class="guide-title">📖 מדריך — מיזוג מק״ט</div>
-      <ol class="steps">
-        <li>
-          <b>1. העלאת שני קבצים</b>
-          <span>קובץ מקור (שיש בו מק״ט) וקובץ יעד (שאליו מוסיפים את המק״ט).</span>
-          <em>השלכה: שני הקבצים נדרשים כדי להמשיך.</em>
-        </li>
-        <li>
-          <b>2. עמודות שם המוצר</b>
-          <span>בוחרים את עמודת שם המוצר בכל קובץ — היא יכולה להיקרא אחרת בכל אחד (למשל "פריט" מול "מוצר").</span>
-          <em>השלכה: ההתאמה לפי טקסט, אחרי ניקוי רווחים מיותרים.</em>
-        </li>
-        <li>
-          <b>3. עמודת המק״ט ושם העמודה</b>
-          <span>איזו עמודה להעתיק מהמקור, ואיך תיקרא העמודה החדשה בקובץ היעד.</span>
-          <em>השלכה: העמודה החדשה ממוקמת מיד אחרי שם המוצר.</em>
-        </li>
-        <li>
-          <b>4. מיזוג</b>
-          <span>מוסיף את המק״ט לכל פריט בקובץ היעד לפי ההתאמה.</span>
-          <em>השלכה: כל שורות היעד נשמרות, גם אם לא נמצאה התאמה.</em>
-        </li>
-        <li>
-          <b>5. תוצאה</b>
-          <span>הורדת קובץ אחד עם עמודת המק״ט המתווספת.</span>
-          <em>השלכה: שורות ללא התאמה נצבעות באדום ומרוכזות בגיליון "ללא התאמה".</em>
-        </li>
-      </ol>
-    </div>
-  </aside>
-
   </div><!-- /layout -->
 
   <footer>נבנה באהבה 🌿 — כל העיבוד מתבצע במחשב שלך, שום קובץ לא נשלח לאינטרנט</footer>
@@ -986,8 +956,6 @@ document.querySelectorAll(".tab").forEach(tab => {
     document.querySelectorAll(".tab").forEach(x => x.classList.toggle("active", x === tab));
     $("toolSplit").classList.toggle("hidden", tool !== "split");
     $("toolMerge").classList.toggle("hidden", tool !== "merge");
-    $("guideSplit").classList.toggle("hidden", tool !== "split");
-    $("guideMerge").classList.toggle("hidden", tool !== "merge");
     $("appTitle").textContent = TITLES[tool].t;
     $("appSub").textContent   = TITLES[tool].s;
   });
