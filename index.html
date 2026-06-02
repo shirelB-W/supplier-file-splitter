@@ -755,6 +755,10 @@ const TOTAL_STYLE = {
   fill: { patternType:"solid", fgColor:{ rgb:"EEFCF7" } },
   font: { bold:true, color:{ rgb:"1F6B4B" } }
 };
+const UNMATCHED_STYLE = {
+  fill: { patternType:"solid", fgColor:{ rgb:"FFE0E6" } },  // אדום-ורוד עדין
+  font: { color:{ rgb:"B23A5A" } }
+};
 function styleHeaderRow(ws, ncols){
   for(let c=0;c<ncols;c++){
     const addr = XLSX.utils.encode_cell({ r:0, c });
@@ -936,15 +940,20 @@ $("mergeBtn").addEventListener("click", async () => {
   });
 
   // הוספת העמודה לקובץ היעד
-  let matched = 0, unmatched = 0;
+  let matched = 0;
+  const isUnmatched = [];
+  const unmatchedRows = [];
   const outRows = tgtRows.map(r => {
     const o = Object.assign({}, r);
     const k = norm(r[matchCol]);
     const val = (k !== "" && (k in map)) ? map[k] : "";
     o[newCol] = val;
-    if(val !== "" && val !== null) matched++; else unmatched++;
+    const um = !(val !== "" && val !== null);
+    if(um){ unmatchedRows.push(o); } else { matched++; }
+    isUnmatched.push(um);
     return o;
   });
+  const unmatched = unmatchedRows.length;
 
   // סדר העמודות: העמודה החדשה מיד אחרי עמודת ההתאמה
   let outHeaders;
@@ -961,8 +970,27 @@ $("mergeBtn").addEventListener("click", async () => {
   const ws = XLSX.utils.json_to_sheet(outRows, { header: outHeaders });
   ws["!cols"] = outHeaders.map(h => ({ wch: Math.min(28, Math.max(12, String(h).length + 2)) }));
   styleHeaderRow(ws, outHeaders.length);
+  // צביעת שורות שלא נמצאה להן התאמה
+  isUnmatched.forEach((um, i) => {
+    if(!um) return;
+    const r = i + 1;  // שורה 0 = כותרת
+    for(let c=0;c<outHeaders.length;c++){
+      const a = XLSX.utils.encode_cell({ r, c });
+      if(!ws[a]) ws[a] = { t:"s", v:"" };
+      ws[a].s = UNMATCHED_STYLE;
+    }
+  });
   const wbOut = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wbOut, ws, sheetName(tgtFileName || "מיזוג"));
+
+  // גיליון נפרד: רק הפריטים ללא התאמה
+  if(unmatched){
+    const wsU = XLSX.utils.json_to_sheet(unmatchedRows, { header: outHeaders });
+    wsU["!cols"] = outHeaders.map(h => ({ wch: Math.min(28, Math.max(12, String(h).length + 2)) }));
+    styleHeaderRow(wsU, outHeaders.length);
+    XLSX.utils.book_append_sheet(wbOut, wsU, "ללא התאמה");
+  }
+
   const out = XLSX.write(wbOut, { bookType:"xlsx", type:"array", cellStyles:true });
   mergedBlob = new Blob([out], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   mergedFilename = safeName((tgtFileName || "קובץ") + " - עם מק״ט") + ".xlsx";
@@ -971,8 +999,9 @@ $("mergeBtn").addEventListener("click", async () => {
   $("mergeSummary").innerHTML =
     `נוצר קובץ אחד עם <b>${outRows.length}</b> שורות.<br>` +
     `✅ נמצא מק״ט עבור <b>${matched}</b> פריטים` +
-    (unmatched ? ` · ⚠️ <b>${unmatched}</b> פריטים ללא התאמה (נשארו ריקים)` : "") +
-    `<br>🔑 התאמה לפי "<b>${matchCol}</b>" · מקור המק״ט: "<b>${copyCol}</b>" · עמודה חדשה: "<b>${newCol}</b>"`;
+    (unmatched ? ` · ⚠️ <b>${unmatched}</b> פריטים ללא התאמה` : "") +
+    `<br>🔑 התאמה לפי "<b>${matchCol}</b>" · מקור המק״ט: "<b>${copyCol}</b>" · עמודה חדשה: "<b>${newCol}</b>"` +
+    (unmatched ? `<br>🎨 השורות ללא התאמה צבועות באדום עדין, וגם רוכזו בגיליון נפרד בשם <b>"ללא התאמה"</b>.` : "");
   $("mergeResultsCard").classList.remove("hidden");
   $("mergeResultsCard").scrollIntoView({ behavior:"smooth", block:"start" });
 });
