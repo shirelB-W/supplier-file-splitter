@@ -36,7 +36,38 @@
     min-height:100vh;
     padding:32px 16px 60px;
   }
-  .wrap{max-width:820px;margin:0 auto;}
+  .wrap{max-width:1160px;margin:0 auto;}
+
+  /* פריסה דו-טורית: פלואו + מדריך צדדי */
+  .layout{display:flex;gap:22px;align-items:flex-start;}
+  .main{flex:1;min-width:0;}
+  .guide{width:310px;flex-shrink:0;position:sticky;top:18px;}
+  @media(max-width:900px){
+    .layout{flex-direction:column;}
+    .guide{width:100%;position:static;}
+  }
+
+  /* כרטיס מדריך */
+  .guide-card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:22px;
+  }
+  .guide-title{font-weight:800;font-size:16px;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+  .steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:15px;}
+  .steps li{border-right:3px solid var(--lavender);padding-right:12px;}
+  .steps li b{display:block;font-size:13.5px;color:var(--text);margin-bottom:3px;}
+  .steps li span{display:block;font-size:12.5px;color:var(--text-soft);line-height:1.55;}
+  .steps li em{
+    display:inline-block;font-style:normal;font-size:11.5px;color:var(--lavender-d);
+    background:var(--bg1);padding:3px 9px;border-radius:8px;margin-top:5px;
+  }
+
+  /* רשימת תוצאות נגללת + חיפוש */
+  .scroll-list{overflow-y:auto;padding-left:6px;}
+  .scroll-list::-webkit-scrollbar{width:9px;}
+  .scroll-list::-webkit-scrollbar-thumb{background:var(--lavender);border-radius:9px;}
+  .scroll-list::-webkit-scrollbar-track{background:var(--bg1);border-radius:9px;}
+  .search-empty{text-align:center;color:var(--text-soft);font-size:14px;padding:18px;}
 
   header{text-align:center;margin-bottom:28px;}
   header .logo{
@@ -224,6 +255,9 @@
     <button class="tab" data-tool="merge">🔗 מיזוג מק״ט</button>
   </div>
 
+  <div class="layout">
+  <div class="main">
+
   <!-- ============ כלי 1: פיצול לפי ספקים (עדי עוז) ============ -->
   <div id="toolSplit">
 
@@ -296,7 +330,9 @@
       <button class="btn btn-zip" id="allBtn">⬇️ הורדת כל הקבצים</button>
     </div>
     <div class="summary" id="summary"></div>
-    <div class="supplier-list" id="supplierList"></div>
+    <input type="text" id="fileSearch" class="text-input" placeholder="🔍 חיפוש לפי שם הקובץ..." style="margin-bottom:12px;" />
+    <div class="supplier-list scroll-list" id="supplierList"></div>
+    <div class="search-empty hidden" id="searchEmpty">לא נמצאו קבצים התואמים לחיפוש 🔍</div>
   </div>
 
   </div><!-- /toolSplit -->
@@ -367,6 +403,87 @@
     </div>
 
   </div><!-- /toolMerge -->
+
+  </div><!-- /main -->
+
+  <!-- ============ מדריך צדדי ============ -->
+  <aside class="guide">
+    <!-- מדריך לפיצול לפי ספקים -->
+    <div class="guide-card" id="guideSplit">
+      <div class="guide-title">📖 מדריך — פיצול לפי ספקים</div>
+      <ol class="steps">
+        <li>
+          <b>1. העלאת הקובץ</b>
+          <span>גררי קובץ אקסל (‎.xlsx‎). המערכת קוראת את הגיליון הראשון ומזהה את העמודות.</span>
+          <em>השלכה: רק הגיליון הראשון נקרא; השורה הראשונה = כותרות.</em>
+        </li>
+        <li>
+          <b>2. עמודת שם הספק</b>
+          <span>לפיה מתבצע הפיצול — כל ערך ייחודי הופך לקובץ נפרד.</span>
+          <em>השלכה: שורות בלי ערך מרוכזות בקובץ "ללא שם ספק".</em>
+        </li>
+        <li>
+          <b>3. עמודת תאריך</b>
+          <span>קובעת את החודש-שנה בשם הקובץ (חודש-שנה שם הספק).</span>
+          <em>השלכה: אם לספק כמה חודשים — נבחר החודש השכיח.</em>
+        </li>
+        <li>
+          <b>4. עמודות לסיכום</b>
+          <span>סימון עמודות מספריות שיתווסף להן "סה״כ" בתחתית כל קובץ.</span>
+          <em>השלכה: לא חובה — אפשר להשאיר ריק.</em>
+        </li>
+        <li>
+          <b>5. גיליון "סיכום לפי סניף"</b>
+          <span>גיליון שני בכל קובץ עם סכום זיכוי (לפני/כולל מע״מ) לכל סניף.</span>
+          <em>השלכה: אפשר לכבות אם לא נחוץ.</em>
+        </li>
+        <li>
+          <b>6. פיצול לפי ספקים</b>
+          <span>יוצר קובץ אקסל מעוצב לכל ספק.</span>
+          <em>השלכה: הקבצים נוצרים בדפדפן — שום דבר לא נשלח לרשת.</em>
+        </li>
+        <li>
+          <b>7. הורדה</b>
+          <span>הורדת כל קובץ בנפרד, או הכל יחד. אפשר לחפש קובץ ברשימה.</span>
+          <em>השלכה: בהורדת הכל הדפדפן עשוי לבקש אישור להורדות מרובות.</em>
+        </li>
+      </ol>
+    </div>
+
+    <!-- מדריך למיזוג מק״ט -->
+    <div class="guide-card hidden" id="guideMerge">
+      <div class="guide-title">📖 מדריך — מיזוג מק״ט</div>
+      <ol class="steps">
+        <li>
+          <b>1. העלאת שני קבצים</b>
+          <span>קובץ מקור (שיש בו מק״ט) וקובץ יעד (שאליו מוסיפים את המק״ט).</span>
+          <em>השלכה: שני הקבצים נדרשים כדי להמשיך.</em>
+        </li>
+        <li>
+          <b>2. עמודות שם המוצר</b>
+          <span>בוחרים את עמודת שם המוצר בכל קובץ — היא יכולה להיקרא אחרת בכל אחד (למשל "פריט" מול "מוצר").</span>
+          <em>השלכה: ההתאמה לפי טקסט, אחרי ניקוי רווחים מיותרים.</em>
+        </li>
+        <li>
+          <b>3. עמודת המק״ט ושם העמודה</b>
+          <span>איזו עמודה להעתיק מהמקור, ואיך תיקרא העמודה החדשה בקובץ היעד.</span>
+          <em>השלכה: העמודה החדשה ממוקמת מיד אחרי שם המוצר.</em>
+        </li>
+        <li>
+          <b>4. מיזוג</b>
+          <span>מוסיף את המק״ט לכל פריט בקובץ היעד לפי ההתאמה.</span>
+          <em>השלכה: כל שורות היעד נשמרות, גם אם לא נמצאה התאמה.</em>
+        </li>
+        <li>
+          <b>5. תוצאה</b>
+          <span>הורדת קובץ אחד עם עמודת המק״ט המתווספת.</span>
+          <em>השלכה: שורות ללא התאמה נצבעות באדום ומרוכזות בגיליון "ללא התאמה".</em>
+        </li>
+      </ol>
+    </div>
+  </aside>
+
+  </div><!-- /layout -->
 
   <footer>נבנה באהבה 🌿 — כל העיבוד מתבצע במחשב שלך, שום קובץ לא נשלח לאינטרנט</footer>
 </div>
@@ -786,6 +903,7 @@ function renderResults(emptyCount, sumCols){
   supplierFiles.forEach((f,i) => {
     const row = document.createElement("div");
     row.className = "supplier-row";
+    row.dataset.search = (f.name + " " + f.filename).toLowerCase();
     row.innerHTML = `
       <div class="name">
         <span class="dot"></span>
@@ -800,6 +918,19 @@ function renderResults(emptyCount, sumCols){
       </div>`;
     list.appendChild(row);
   });
+  // איפוס החיפוש וקביעת גובה הרשימה ל-5.5 קבצים (מחושב דינמית)
+  $("fileSearch").value = "";
+  $("searchEmpty").classList.add("hidden");
+  if(supplierFiles.length){
+    requestAnimationFrame(() => {
+      const first = list.querySelector(".supplier-row");
+      if(first){
+        const gap = 10; // gap בין שורות
+        const h = first.getBoundingClientRect().height;
+        list.style.maxHeight = Math.round(5.5 * h + 5 * gap) + "px";
+      }
+    });
+  }
   list.querySelectorAll("button[data-i]").forEach(b=>{
     b.addEventListener("click",()=>{
       const f = supplierFiles[b.dataset.i];
@@ -830,6 +961,18 @@ $("allBtn").addEventListener("click", async () => {
   btn.disabled = false;
 });
 
+/* ---------- חיפוש בתוך רשימת הקבצים ---------- */
+$("fileSearch").addEventListener("input", () => {
+  const q = $("fileSearch").value.trim().toLowerCase();
+  let visible = 0;
+  $("supplierList").querySelectorAll(".supplier-row").forEach(row => {
+    const match = !q || (row.dataset.search || "").includes(q);
+    row.style.display = match ? "" : "none";
+    if(match) visible++;
+  });
+  $("searchEmpty").classList.toggle("hidden", visible !== 0);
+});
+
 /* =====================================================================
    לשוניות + כלי מיזוג מק״ט ("נועה מוסקטו")
    ===================================================================== */
@@ -843,6 +986,8 @@ document.querySelectorAll(".tab").forEach(tab => {
     document.querySelectorAll(".tab").forEach(x => x.classList.toggle("active", x === tab));
     $("toolSplit").classList.toggle("hidden", tool !== "split");
     $("toolMerge").classList.toggle("hidden", tool !== "merge");
+    $("guideSplit").classList.toggle("hidden", tool !== "split");
+    $("guideMerge").classList.toggle("hidden", tool !== "merge");
     $("appTitle").textContent = TITLES[tool].t;
     $("appSub").textContent   = TITLES[tool].s;
   });
