@@ -121,6 +121,31 @@
   .supplier-row .dot{width:10px;height:10px;border-radius:50%;background:var(--lavender);}
   .badge{background:var(--peach);color:#a85a2b;font-size:12px;font-weight:800;padding:3px 11px;border-radius:999px;}
 
+  /* לשוניות */
+  .tabs{display:flex;gap:10px;justify-content:center;margin-bottom:22px;flex-wrap:wrap;}
+  .tab{
+    border:1.5px solid var(--line);background:#fff;color:var(--text-soft);
+    border-radius:999px;padding:11px 24px;font-size:15px;font-weight:800;font-family:inherit;
+    cursor:pointer;transition:.18s;box-shadow:0 4px 14px rgba(150,130,200,.08);
+  }
+  .tab:hover{border-color:var(--lavender);color:var(--lavender-d);}
+  .tab.active{background:linear-gradient(135deg,var(--lavender-d),var(--lavender));color:#fff;border-color:transparent;}
+
+  /* שני אזורי העלאה זה לצד זה */
+  .two-drops{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:560px){ .two-drops{grid-template-columns:1fr;} }
+  .mlabel{font-weight:800;font-size:14px;margin-bottom:8px;}
+  .mlabel span{font-weight:500;color:var(--text-soft);font-size:12.5px;}
+  .drop-sm{padding:26px 14px;}
+  .drop-sm .ico{font-size:34px;margin-bottom:6px;}
+  .drop-sm .big{font-size:15px;}
+
+  .text-input{
+    width:100%;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line);
+    font-size:15px;font-family:inherit;background:#fff;color:var(--text);
+  }
+  .text-input:focus{outline:none;border-color:var(--lavender-d);}
+
   /* תיבות סימון לעמודות סיכום */
   .checks{display:flex;flex-wrap:wrap;gap:8px;}
   .chk{
@@ -189,9 +214,18 @@
 
   <header>
     <div class="logo">🌸</div>
-    <h1>עדי עוז</h1>
-    <p>מעלה קובץ אחד — מקבלת קובץ אקסל נפרד לכל ספק</p>
+    <h1 id="appTitle">עדי עוז</h1>
+    <p id="appSub">מעלה קובץ אחד — מקבלת קובץ אקסל נפרד לכל ספק</p>
   </header>
+
+  <!-- לשוניות מעבר בין הכלים -->
+  <div class="tabs">
+    <button class="tab active" data-tool="split">🗂️ פיצול לפי ספקים</button>
+    <button class="tab" data-tool="merge">🔗 מיזוג מק״ט</button>
+  </div>
+
+  <!-- ============ כלי 1: פיצול לפי ספקים (עדי עוז) ============ -->
+  <div id="toolSplit">
 
   <!-- שלב 1: העלאה -->
   <div class="card">
@@ -264,6 +298,71 @@
     <div class="summary" id="summary"></div>
     <div class="supplier-list" id="supplierList"></div>
   </div>
+
+  </div><!-- /toolSplit -->
+
+  <!-- ============ כלי 2: מיזוג מק״ט (נועה מוסקטו) ============ -->
+  <div id="toolMerge" class="hidden">
+
+    <!-- שלב 1: העלאת שני קבצים -->
+    <div class="card">
+      <div class="card-title"><span class="step-num">1</span> העלאת שני הקבצים</div>
+      <div class="two-drops">
+        <div>
+          <div class="mlabel">📤 קובץ מקור <span>(שממנו לוקחים את המק״ט)</span></div>
+          <div class="drop drop-sm" id="dropSrc">
+            <div class="ico">📄</div>
+            <div class="big">גררי / לחצי לבחירה</div>
+            <div id="srcTag"></div>
+          </div>
+          <input type="file" id="fileSrc" accept=".xlsx,.xls" />
+        </div>
+        <div>
+          <div class="mlabel">📥 קובץ יעד <span>(שאליו מוסיפים את המק״ט)</span></div>
+          <div class="drop drop-sm" id="dropTgt">
+            <div class="ico">📄</div>
+            <div class="big">גררי / לחצי לבחירה</div>
+            <div id="tgtTag"></div>
+          </div>
+          <input type="file" id="fileTgt" accept=".xlsx,.xls" />
+        </div>
+      </div>
+      <div id="mergeUploadMsg"></div>
+    </div>
+
+    <!-- שלב 2: הגדרות מיזוג -->
+    <div class="card hidden" id="mergeOptsCard">
+      <div class="card-title"><span class="step-num">2</span> הגדרות המיזוג</div>
+      <div class="field">
+        <label for="matchCol">עמודת שם המוצר (להתאמה בין הקבצים)</label>
+        <select id="matchCol"></select>
+      </div>
+      <div class="field">
+        <label for="copyCol">העמודה להעתקה מקובץ המקור (המק״ט)</label>
+        <select id="copyCol"></select>
+      </div>
+      <div class="field">
+        <label for="newColName">שם העמודה שתתווסף לקובץ היעד</label>
+        <input type="text" id="newColName" class="text-input" value="מק&quot;ט" />
+      </div>
+    </div>
+
+    <!-- שלב 3: מיזוג -->
+    <div class="card hidden" id="mergeRunCard">
+      <div class="card-title"><span class="step-num">3</span> מיזוג</div>
+      <button class="btn btn-main" id="mergeBtn">✨ מזגי והוסיפי מק״ט</button>
+    </div>
+
+    <!-- שלב 4: תוצאה -->
+    <div class="card hidden" id="mergeResultsCard">
+      <div class="results-head">
+        <h2>📁 הקובץ מוכן</h2>
+        <button class="btn btn-zip" id="mergeDownloadBtn">⬇️ הורדת הקובץ</button>
+      </div>
+      <div class="summary" id="mergeSummary"></div>
+    </div>
+
+  </div><!-- /toolMerge -->
 
   <footer>נבנה באהבה 🌿 — כל העיבוד מתבצע במחשב שלך, שום קובץ לא נשלח לאינטרנט</footer>
 </div>
@@ -721,6 +820,165 @@ $("allBtn").addEventListener("click", async () => {
   }
   btn.textContent = original;
   btn.disabled = false;
+});
+
+/* =====================================================================
+   לשוניות + כלי מיזוג מק״ט ("נועה מוסקטו")
+   ===================================================================== */
+const TITLES = {
+  split: { t:"עדי עוז",      s:"מעלה קובץ אחד — מקבלת קובץ אקסל נפרד לכל ספק" },
+  merge: { t:"נועה מוסקטו", s:'מעלה שני קבצים — מקבלת קובץ אחד עם עמודת מק״ט מתווספת' }
+};
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    const tool = tab.dataset.tool;
+    document.querySelectorAll(".tab").forEach(x => x.classList.toggle("active", x === tab));
+    $("toolSplit").classList.toggle("hidden", tool !== "split");
+    $("toolMerge").classList.toggle("hidden", tool !== "merge");
+    $("appTitle").textContent = TITLES[tool].t;
+    $("appSub").textContent   = TITLES[tool].s;
+  });
+});
+
+/* ---------- מצב כלי המיזוג ---------- */
+let srcRows = null, srcHeaders = [], srcFileName = "";
+let tgtRows = null, tgtHeaders = [], tgtFileName = "";
+let mergedBlob = null, mergedFilename = "";
+
+const PREFERRED_MATCH = "פריט";
+const norm = v => String(v === undefined || v === null ? "" : v).trim().replace(/\s+/g," ");
+
+function readSheet(file, cb){
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try{
+      const wb = XLSX.read(new Uint8Array(ev.target.result), { type:"array" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval:"" });
+      cb(null, rows, rows.length ? Object.keys(rows[0]) : []);
+    }catch(err){ cb(err); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function bindMergeDrop(dropId, inputId, which){
+  const d = $(dropId), inp = $(inputId);
+  d.addEventListener("click", () => inp.click());
+  d.addEventListener("dragover", e => { e.preventDefault(); d.classList.add("over"); });
+  d.addEventListener("dragleave", () => d.classList.remove("over"));
+  d.addEventListener("drop", e => { e.preventDefault(); d.classList.remove("over"); if(e.dataTransfer.files.length) handleMergeFile(e.dataTransfer.files[0], which); });
+  inp.addEventListener("change", e => { if(e.target.files.length) handleMergeFile(e.target.files[0], which); });
+}
+bindMergeDrop("dropSrc","fileSrc","src");
+bindMergeDrop("dropTgt","fileTgt","tgt");
+
+function handleMergeFile(file, which){
+  if(!/\.(xlsx|xls)$/i.test(file.name)){
+    showMsg("mergeUploadMsg","⚠️ אפשר להעלות רק קבצי אקסל (‎.xlsx / .xls‎).","err"); return;
+  }
+  $("mergeResultsCard").classList.add("hidden");
+  readSheet(file, (err, rows, hdrs) => {
+    if(err || !rows.length){
+      showMsg("mergeUploadMsg","❌ לא הצלחתי לקרוא את הקובץ או שהוא ריק.","err"); return;
+    }
+    if(which === "src"){
+      srcRows = rows; srcHeaders = hdrs; srcFileName = file.name.replace(/\.(xlsx|xls)$/i,"");
+      $("srcTag").innerHTML = `<div class="file-tag">✓ ${file.name} · ${rows.length} שורות</div>`;
+    } else {
+      tgtRows = rows; tgtHeaders = hdrs; tgtFileName = file.name.replace(/\.(xlsx|xls)$/i,"");
+      $("tgtTag").innerHTML = `<div class="file-tag">✓ ${file.name} · ${rows.length} שורות</div>`;
+    }
+    if(srcRows && tgtRows){
+      buildMergeSelects();
+      $("mergeOptsCard").classList.remove("hidden");
+      $("mergeRunCard").classList.remove("hidden");
+      showMsg("mergeUploadMsg","שני הקבצים נטענו. בדקי את העמודות ולחצי על המיזוג.","info");
+    } else {
+      showMsg("mergeUploadMsg","","");
+    }
+  });
+}
+
+function buildMergeSelects(){
+  // עמודת התאמה - מתוך עמודות המשותפות לשני הקבצים (אחרת איחוד)
+  const common = tgtHeaders.filter(h => srcHeaders.includes(h));
+  const matchList = common.length ? common : Array.from(new Set([...tgtHeaders, ...srcHeaders]));
+  fillSelect($("matchCol"), matchList, false);
+  const m = matchList.find(h => h.trim() === PREFERRED_MATCH)
+         || matchList.find(h => h.includes("פריט"))
+         || matchList.find(h => h.includes("מוצר"));
+  if(m) $("matchCol").value = m;
+
+  // עמודת המק"ט - מתוך עמודות קובץ המקור
+  fillSelect($("copyCol"), srcHeaders, false);
+  const c = srcHeaders.find(h => h.includes("מק"))   // מק"ט / מקט
+         || srcHeaders.find(h => h.includes("קוד"));
+  if(c) $("copyCol").value = c;
+}
+
+/* ---------- ביצוע המיזוג ---------- */
+$("mergeBtn").addEventListener("click", async () => {
+  if(!srcRows || !tgtRows){ showMsg("mergeUploadMsg","יש להעלות את שני הקבצים.","err"); return; }
+  const matchCol = $("matchCol").value;
+  const copyCol  = $("copyCol").value;
+  let   newCol   = ($("newColName").value || 'מק"ט').trim() || 'מק"ט';
+
+  showMsg("mergeUploadMsg","");
+  showLoader("ממזג את הקבצים", "בונה טבלת התאמה…");
+  await nextFrame();
+
+  // בניית מפה: שם מוצר -> ערך המק"ט (ההופעה הראשונה עם ערך)
+  const map = {};
+  srcRows.forEach(r => {
+    const k = norm(r[matchCol]); if(k === "") return;
+    const v = r[copyCol];
+    if(!(k in map) || map[k] === "" || map[k] == null){ map[k] = (v == null ? "" : v); }
+  });
+
+  // הוספת העמודה לקובץ היעד
+  let matched = 0, unmatched = 0;
+  const outRows = tgtRows.map(r => {
+    const o = Object.assign({}, r);
+    const k = norm(r[matchCol]);
+    const val = (k !== "" && (k in map)) ? map[k] : "";
+    o[newCol] = val;
+    if(val !== "" && val !== null) matched++; else unmatched++;
+    return o;
+  });
+
+  // סדר העמודות: העמודה החדשה מיד אחרי עמודת ההתאמה
+  let outHeaders;
+  if(tgtHeaders.includes(newCol)){ outHeaders = tgtHeaders.slice(); }
+  else {
+    outHeaders = tgtHeaders.slice();
+    const idx = outHeaders.indexOf(matchCol);
+    outHeaders.splice(idx >= 0 ? idx+1 : outHeaders.length, 0, newCol);
+  }
+
+  setLoaderSub("יוצר קובץ אקסל…");
+  await nextFrame();
+
+  const ws = XLSX.utils.json_to_sheet(outRows, { header: outHeaders });
+  ws["!cols"] = outHeaders.map(h => ({ wch: Math.min(28, Math.max(12, String(h).length + 2)) }));
+  styleHeaderRow(ws, outHeaders.length);
+  const wbOut = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wbOut, ws, sheetName(tgtFileName || "מיזוג"));
+  const out = XLSX.write(wbOut, { bookType:"xlsx", type:"array", cellStyles:true });
+  mergedBlob = new Blob([out], { type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  mergedFilename = safeName((tgtFileName || "קובץ") + " - עם מק״ט") + ".xlsx";
+
+  hideLoader();
+  $("mergeSummary").innerHTML =
+    `נוצר קובץ אחד עם <b>${outRows.length}</b> שורות.<br>` +
+    `✅ נמצא מק״ט עבור <b>${matched}</b> פריטים` +
+    (unmatched ? ` · ⚠️ <b>${unmatched}</b> פריטים ללא התאמה (נשארו ריקים)` : "") +
+    `<br>🔑 התאמה לפי "<b>${matchCol}</b>" · מקור המק״ט: "<b>${copyCol}</b>" · עמודה חדשה: "<b>${newCol}</b>"`;
+  $("mergeResultsCard").classList.remove("hidden");
+  $("mergeResultsCard").scrollIntoView({ behavior:"smooth", block:"start" });
+});
+
+$("mergeDownloadBtn").addEventListener("click", () => {
+  if(mergedBlob) saveAs(mergedBlob, mergedFilename);
 });
 </script>
 </body>
