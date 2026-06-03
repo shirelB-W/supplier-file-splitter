@@ -48,32 +48,32 @@
     font-size:12px;font-weight:800;flex-shrink:0;
   }
 
-  /* טול-טיפ — לבן/קרם מינימליסטי */
+  /* טול-טיפ קלאסי — בועה כהה קטנה, מופיע בריחוף */
   .info{
     position:relative;display:inline-flex;align-items:center;justify-content:center;
-    width:17px;height:17px;border-radius:50%;
-    background:#f5f2fb;color:var(--lavender-d);border:1.5px solid var(--line);
+    width:16px;height:16px;border-radius:50%;
+    background:#e9e4f5;color:var(--lavender-d);
     font-size:11px;font-weight:700;cursor:help;
     margin-inline-start:7px;flex-shrink:0;font-family:Georgia,serif;font-style:italic;
-    transition:.15s;
+    transition:.12s;
   }
-  .info:hover{background:var(--lavender);color:#fff;border-color:var(--lavender);}
+  .info:hover{background:var(--lavender-d);color:#fff;}
   .info:focus{outline:none;box-shadow:0 0 0 3px rgba(168,131,232,.3);}
   .info .tip{
-    position:absolute;bottom:155%;right:-7px;
-    background:#fffdf9;color:var(--text);
-    border:1px solid var(--line);border-right:3px solid var(--lavender);
-    border-radius:12px;padding:12px 15px;width:250px;
-    font-size:12.5px;font-weight:500;line-height:1.65;text-align:right;letter-spacing:-.1px;
-    box-shadow:0 10px 28px rgba(74,68,88,.13);
-    opacity:0;visibility:hidden;transform:translateY(6px);transition:.18s;
-    z-index:40;pointer-events:none;white-space:normal;
+    position:absolute;bottom:145%;right:50%;transform:translateX(50%) translateY(5px);
+    background:#3b3a47;color:#fff;
+    border-radius:8px;padding:8px 11px;width:max-content;max-width:230px;
+    font-size:12px;font-weight:500;line-height:1.5;text-align:center;
+    box-shadow:0 4px 16px rgba(0,0,0,.22);
+    opacity:0;visibility:hidden;transition:.13s;
+    z-index:40;pointer-events:none;
   }
-  .info:hover .tip, .info:focus .tip{opacity:1;visibility:visible;transform:translateY(0);}
-  .info .tip .imp{
-    display:block;margin-top:8px;padding-top:8px;border-top:1px solid var(--line);
-    color:var(--text-soft);font-size:11.5px;font-weight:500;
+  .info .tip::after{
+    content:"";position:absolute;top:100%;right:50%;transform:translateX(50%);
+    border:6px solid transparent;border-top-color:#3b3a47;
   }
+  .info:hover .tip, .info:focus .tip{opacity:1;visibility:visible;transform:translateX(50%) translateY(0);}
+  .info .tip .imp{display:block;margin-top:4px;color:rgba(255,255,255,.72);font-size:11px;}
   .card-title .info{vertical-align:middle;}
 
   /* רשימת תוצאות נגללת + חיפוש */
