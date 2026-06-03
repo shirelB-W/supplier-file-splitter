@@ -49,7 +49,7 @@
   }
 
   /* טול-טיפ קלאסי — בועה כהה קטנה, מופיע בריחוף */
-  .info{
+  .helptip{
     position:relative;display:inline-flex;align-items:center;justify-content:center;
     width:16px;height:16px;border-radius:50%;
     background:#e9e4f5;color:var(--lavender-d);
@@ -57,24 +57,25 @@
     margin-inline-start:7px;flex-shrink:0;font-family:Georgia,serif;font-style:italic;
     transition:.12s;
   }
-  .info:hover{background:var(--lavender-d);color:#fff;}
-  .info:focus{outline:none;box-shadow:0 0 0 3px rgba(168,131,232,.3);}
-  .info .tip{
-    position:absolute;bottom:145%;right:50%;transform:translateX(50%) translateY(5px);
+  .helptip:hover{background:var(--lavender-d);color:#fff;}
+  .helptip:focus{outline:none;box-shadow:0 0 0 3px rgba(168,131,232,.3);}
+  .helptip .tip{
+    position:absolute;bottom:160%;right:-4px;
     background:#3b3a47;color:#fff;
-    border-radius:8px;padding:8px 11px;width:max-content;max-width:230px;
-    font-size:12px;font-weight:500;line-height:1.5;text-align:center;
-    box-shadow:0 4px 16px rgba(0,0,0,.22);
-    opacity:0;visibility:hidden;transition:.13s;
+    border-radius:8px;padding:9px 12px;
+    width:230px;white-space:normal;word-break:break-word;overflow-wrap:anywhere;
+    font-size:12px;font-weight:500;line-height:1.55;text-align:right;
+    box-shadow:0 6px 18px rgba(0,0,0,.24);
+    opacity:0;visibility:hidden;transform:translateY(5px);transition:.13s;
     z-index:40;pointer-events:none;
   }
-  .info .tip::after{
-    content:"";position:absolute;top:100%;right:50%;transform:translateX(50%);
+  .helptip .tip::after{
+    content:"";position:absolute;top:100%;right:9px;
     border:6px solid transparent;border-top-color:#3b3a47;
   }
-  .info:hover .tip, .info:focus .tip{opacity:1;visibility:visible;transform:translateX(50%) translateY(0);}
-  .info .tip .imp{display:block;margin-top:4px;color:rgba(255,255,255,.72);font-size:11px;}
-  .card-title .info{vertical-align:middle;}
+  .helptip:hover .tip, .helptip:focus .tip{opacity:1;visibility:visible;transform:translateY(0);}
+  .helptip .tip .imp{display:block;margin-top:4px;color:rgba(255,255,255,.72);font-size:11px;}
+  .card-title .helptip{vertical-align:middle;}
 
   /* רשימת תוצאות נגללת + חיפוש */
   .scroll-list{overflow-y:auto;padding-left:6px;}
@@ -278,7 +279,7 @@
   <!-- שלב 1: העלאה -->
   <div class="card">
     <div class="card-title"><span class="step-num">1</span> העלאת הקובץ
-      <span class="info" tabindex="0">i<span class="tip">גררי קובץ אקסל (‎.xlsx / .xls‎). המערכת קוראת את הגיליון הראשון ומזהה אוטומטית את העמודות.<span class="imp">רק הגיליון הראשון נקרא; השורה הראשונה משמשת ככותרות.</span></span></span>
+      <span class="helptip" tabindex="0">i<span class="tip">גררי קובץ אקסל (‎.xlsx / .xls‎). המערכת קוראת את הגיליון הראשון ומזהה אוטומטית את העמודות.<span class="imp">רק הגיליון הראשון נקרא; השורה הראשונה משמשת ככותרות.</span></span></span>
     </div>
     <div class="drop" id="drop">
       <div class="ico">📂</div>
@@ -291,7 +292,7 @@
     <!-- בחירת עמודת הספק -->
     <div class="field hidden" id="colField">
       <label for="colSelect" class="lbl-step"><span class="num-mini">2</span> עמודת שם הספק
-        <span class="info" tabindex="0">i<span class="tip">לפי עמודה זו מתבצע הפיצול — כל ערך ייחודי הופך לקובץ נפרד.<span class="imp">שורות ללא ערך מרוכזות בקובץ "ללא שם ספק".</span></span></span>
+        <span class="helptip" tabindex="0">i<span class="tip">לפי עמודה זו מתבצע הפיצול — כל ערך ייחודי הופך לקובץ נפרד.<span class="imp">שורות ללא ערך מרוכזות בקובץ "ללא שם ספק".</span></span></span>
       </label>
       <select id="colSelect"></select>
     </div>
@@ -299,7 +300,7 @@
     <!-- בחירת עמודת התאריך (לשם הקובץ) -->
     <div class="field hidden" id="dateField">
       <label for="dateSelect" class="lbl-step"><span class="num-mini">3</span> עמודת התאריך (לחילוץ חודש ושנה לשם הקובץ)
-        <span class="info" tabindex="0">i<span class="tip">קובעת את החודש והשנה בשם הקובץ (חודש-שנה שם הספק).<span class="imp">אם לספק יש כמה חודשים — נבחר החודש השכיח.</span></span></span>
+        <span class="helptip" tabindex="0">i<span class="tip">קובעת את החודש והשנה בשם הקובץ (חודש-שנה שם הספק).<span class="imp">אם לספק יש כמה חודשים — נבחר החודש השכיח.</span></span></span>
       </label>
       <select id="dateSelect"></select>
       <div class="small" style="color:var(--text-soft);margin-top:6px;">שם כל קובץ יהיה: <b>חודש-שנה שם הספק</b> · לדוגמה: <span dir="ltr">05-2026</span> שיווק שלי</div>
@@ -308,7 +309,7 @@
     <!-- עמודות לסיכום -->
     <div class="field hidden" id="sumField">
       <label class="lbl-step"><span class="num-mini">4</span> עמודות לסיכום — תתווסף שורת "סה״כ" בתחתית כל קובץ
-        <span class="info" tabindex="0">i<span class="tip">סמני עמודות מספריות שיתווסף להן סיכום ("סה״כ") בתחתית כל קובץ.<span class="imp">לא חובה — אפשר להשאיר ללא סימון.</span></span></span>
+        <span class="helptip" tabindex="0">i<span class="tip">סמני עמודות מספריות שיתווסף להן סיכום ("סה״כ") בתחתית כל קובץ.<span class="imp">לא חובה — אפשר להשאיר ללא סימון.</span></span></span>
       </label>
       <div id="sumCols" class="checks"></div>
       <div class="small" style="color:var(--text-soft);margin-top:8px;">סמני אילו עמודות מספריות לסכום. אם לא תסמני כלום — לא תתווסף שורת סיכום.</div>
@@ -322,7 +323,7 @@
           <input type="checkbox" id="branchEnable" checked>
           <span>הוספת גיליון "סיכום לפי סניף" לכל קובץ</span>
         </label>
-        <span class="info" tabindex="0">i<span class="tip">מוסיף גיליון שני בכל קובץ עם סכום זיכוי (לפני/כולל מע״מ) לכל סניף.<span class="imp">אפשר לכבות אם לא נחוץ.</span></span></span>
+        <span class="helptip" tabindex="0">i<span class="tip">מוסיף גיליון שני בכל קובץ עם סכום זיכוי (לפני/כולל מע״מ) לכל סניף.<span class="imp">אפשר לכבות אם לא נחוץ.</span></span></span>
       </div>
       <div id="branchOpts" style="display:grid;grid-template-columns:1fr;gap:12px;">
         <div>
@@ -346,7 +347,7 @@
   <!-- שלב 2: עיבוד -->
   <div class="card">
     <div class="card-title"><span class="step-num">6</span> פיצול הנתונים
-      <span class="info" tabindex="0">i<span class="tip">יוצר קובץ אקסל מעוצב נפרד לכל ספק, עם כל העמודות והכותרות.<span class="imp">הכל מתבצע בדפדפן — שום קובץ לא נשלח לרשת.</span></span></span>
+      <span class="helptip" tabindex="0">i<span class="tip">יוצר קובץ אקסל מעוצב נפרד לכל ספק, עם כל העמודות והכותרות.<span class="imp">הכל מתבצע בדפדפן — שום קובץ לא נשלח לרשת.</span></span></span>
     </div>
     <button class="btn btn-main" id="processBtn" disabled>✨ פצל לפי ספקים</button>
   </div>
@@ -355,7 +356,7 @@
   <div class="card hidden" id="resultsCard">
     <div class="results-head">
       <h2><span class="num-mini">7</span> התוצרים מוכנים
-        <span class="info" tabindex="0">i<span class="tip">הורדת כל קובץ בנפרד או הכל יחד; אפשר לחפש קובץ ברשימה.<span class="imp">בהורדת הכל הדפדפן עשוי לבקש אישור להורדות מרובות.</span></span></span>
+        <span class="helptip" tabindex="0">i<span class="tip">הורדת כל קובץ בנפרד או הכל יחד; אפשר לחפש קובץ ברשימה.<span class="imp">בהורדת הכל הדפדפן עשוי לבקש אישור להורדות מרובות.</span></span></span>
       </h2>
       <button class="btn btn-zip" id="allBtn">⬇️ הורדת כל הקבצים</button>
     </div>
@@ -373,7 +374,7 @@
     <!-- שלב 1: העלאת שני קבצים -->
     <div class="card">
       <div class="card-title"><span class="step-num">1</span> העלאת שני הקבצים
-        <span class="info" tabindex="0">i<span class="tip">העלי קובץ מקור (שיש בו מק״ט) וקובץ יעד (שאליו מוסיפים את המק״ט).<span class="imp">שני הקבצים נדרשים כדי להמשיך.</span></span></span>
+        <span class="helptip" tabindex="0">i<span class="tip">העלי קובץ מקור (שיש בו מק״ט) וקובץ יעד (שאליו מוסיפים את המק״ט).<span class="imp">שני הקבצים נדרשים כדי להמשיך.</span></span></span>
       </div>
       <div class="two-drops">
         <div>
@@ -401,29 +402,29 @@
     <!-- שלב 2: הגדרות מיזוג -->
     <div class="card hidden" id="mergeOptsCard">
       <div class="card-title">⚙️ הגדרות המיזוג
-        <span class="info" tabindex="0">i<span class="tip">בוחרים לפי מה לקשר בין הקבצים ומה להעתיק. המערכת מזהה אוטומטית.<span class="imp">ההתאמה לפי טקסט, אחרי ניקוי רווחים מיותרים.</span></span></span>
+        <span class="helptip" tabindex="0">i<span class="tip">בוחרים לפי מה לקשר בין הקבצים ומה להעתיק. המערכת מזהה אוטומטית.<span class="imp">ההתאמה לפי טקסט, אחרי ניקוי רווחים מיותרים.</span></span></span>
       </div>
       <div class="field">
         <label for="matchColTgt" class="lbl-step"><span class="num-mini">2</span> עמודת שם המוצר בקובץ היעד 📥
-          <span class="info" tabindex="0">i<span class="tip">העמודה בקובץ היעד שלפיה מזהים כל מוצר (למשל "פריט").<span class="imp">יכולה להיקרא אחרת מאשר בקובץ המקור.</span></span></span>
+          <span class="helptip" tabindex="0">i<span class="tip">העמודה בקובץ היעד שלפיה מזהים כל מוצר (למשל "פריט").<span class="imp">יכולה להיקרא אחרת מאשר בקובץ המקור.</span></span></span>
         </label>
         <select id="matchColTgt"></select>
       </div>
       <div class="field">
         <label for="matchColSrc" class="lbl-step"><span class="num-mini">3</span> עמודת שם המוצר בקובץ המקור 📤
-          <span class="info" tabindex="0">i<span class="tip">העמודה בקובץ המקור עם אותו שם מוצר (למשל "מוצר").<span class="imp">הערכים צריכים להיות זהים כדי להתאים.</span></span></span>
+          <span class="helptip" tabindex="0">i<span class="tip">העמודה בקובץ המקור עם אותו שם מוצר (למשל "מוצר").<span class="imp">הערכים צריכים להיות זהים כדי להתאים.</span></span></span>
         </label>
         <select id="matchColSrc"></select>
       </div>
       <div class="field">
         <label for="copyCol" class="lbl-step"><span class="num-mini">4</span> העמודה להעתקה מקובץ המקור (המק״ט)
-          <span class="info" tabindex="0">i<span class="tip">הערך שיועתק מקובץ המקור אל קובץ היעד (בדרך כלל המק״ט).</span></span>
+          <span class="helptip" tabindex="0">i<span class="tip">הערך שיועתק מקובץ המקור אל קובץ היעד (בדרך כלל המק״ט).</span></span>
         </label>
         <select id="copyCol"></select>
       </div>
       <div class="field">
         <label for="newColName" class="lbl-step"><span class="num-mini">5</span> שם העמודה שתתווסף לקובץ היעד
-          <span class="info" tabindex="0">i<span class="tip">איך תיקרא העמודה החדשה בקובץ היעד.<span class="imp">תמוקם מיד אחרי עמודת שם המוצר.</span></span></span>
+          <span class="helptip" tabindex="0">i<span class="tip">איך תיקרא העמודה החדשה בקובץ היעד.<span class="imp">תמוקם מיד אחרי עמודת שם המוצר.</span></span></span>
         </label>
         <input type="text" id="newColName" class="text-input" value="מק&quot;ט" />
       </div>
@@ -432,7 +433,7 @@
     <!-- שלב 3: מיזוג -->
     <div class="card hidden" id="mergeRunCard">
       <div class="card-title"><span class="step-num">6</span> מיזוג
-        <span class="info" tabindex="0">i<span class="tip">מוסיף את המק״ט לכל פריט בקובץ היעד לפי ההתאמה.<span class="imp">כל שורות היעד נשמרות, גם ללא התאמה.</span></span></span>
+        <span class="helptip" tabindex="0">i<span class="tip">מוסיף את המק״ט לכל פריט בקובץ היעד לפי ההתאמה.<span class="imp">כל שורות היעד נשמרות, גם ללא התאמה.</span></span></span>
       </div>
       <button class="btn btn-main" id="mergeBtn">✨ מזגי והוסיפי מק״ט</button>
     </div>
@@ -441,7 +442,7 @@
     <div class="card hidden" id="mergeResultsCard">
       <div class="results-head">
         <h2><span class="num-mini">7</span> הקובץ מוכן
-          <span class="info" tabindex="0">i<span class="tip">הורדת קובץ אחד עם עמודת המק״ט שהתווספה.<span class="imp">שורות ללא התאמה נצבעות באדום ומרוכזות בגיליון "ללא התאמה".</span></span></span>
+          <span class="helptip" tabindex="0">i<span class="tip">הורדת קובץ אחד עם עמודת המק״ט שהתווספה.<span class="imp">שורות ללא התאמה נצבעות באדום ומרוכזות בגיליון "ללא התאמה".</span></span></span>
         </h2>
         <button class="btn btn-zip" id="mergeDownloadBtn">⬇️ הורדת הקובץ</button>
       </div>
@@ -643,8 +644,8 @@ function buildSumChecks(){
     box.innerHTML = `<span style="color:var(--text-soft);font-size:13px;">לא זוהו עמודות מספריות בקובץ.</span>`;
     return;
   }
-  // סימון מראש: עמודות מצטברות אמיתיות (שווי / סה"כ / כמות / סכום)
-  const additive = /שווי|סה.?כ|כמות|סכום/;
+  // סימון מראש: עמודות כספיות/מצטברות (שווי / סה"כ / כמות / סכום / מחיר)
+  const additive = /שווי|סה.?כ|כמות|סכום|מחיר/;
   numeric.forEach(h => {
     const pre = additive.test(h);
     const id = "sum_" + btoa(unescape(encodeURIComponent(h))).replace(/=/g,"");
@@ -677,9 +678,12 @@ function buildBranchSelects(){
   // זיהוי אוטומטי
   const branch = headers.find(h => h.includes("סניף"));
   const before = headers.find(h => /זיכוי/.test(h) && /לא כולל/.test(h) && /סה/.test(h))
-              || headers.find(h => /זיכוי/.test(h) && /לא כולל/.test(h));
+              || headers.find(h => /זיכוי/.test(h) && /לא כולל/.test(h))
+              || headers.find(h => /שווי/.test(h) && /זיכוי/.test(h) && !/כולל/.test(h)) // "שווי בזיכוי"
+              || headers.find(h => /שווי/.test(h) && !/כולל/.test(h));
   const incl   = headers.find(h => /זיכוי/.test(h) && /כולל/.test(h) && !/לא כולל/.test(h) && /סה/.test(h))
-              || headers.find(h => /זיכוי/.test(h) && /כולל/.test(h) && !/לא כולל/.test(h));
+              || headers.find(h => /זיכוי/.test(h) && /כולל/.test(h) && !/לא כולל/.test(h))
+              || headers.find(h => /שווי/.test(h) && /כולל/.test(h)); // "שווי בזיכוי כולל מע״מ"
   if(branch) $("branchCol").value = branch;
   if(before) $("beforeCol").value = before;
   if(incl)   $("inclCol").value   = incl;
